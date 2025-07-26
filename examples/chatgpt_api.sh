@@ -1,11 +1,11 @@
-# exo provides an API that aims to be a drop-in replacements for the ChatGPT-API.
+# hanzo-net provides an API that aims to be a drop-in replacements for the ChatGPT-API.
 # This example shows how you can use the API first without streaming and second with streaming.
 # This works the same in a single-node set up and in a multi-node setup.
-# You need to start exo before running this by running `python3 main.py`.
+# You need to start hanzo-net before running this by running `python3 -m net.main`.
 
 API_ENDPOINT="http://${API_ENDPOINT:-$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | head -n 1):52415}"
 MODEL="llama-3.1-8b"
-PROMPT="What is the meaning of exo?"
+PROMPT="What is the meaning of hanzo-net?"
 TEMPERATURE=0.7
 
 echo ""

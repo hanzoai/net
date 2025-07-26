@@ -79,11 +79,12 @@ def _add_gpu_requires():
 _add_gpu_requires()
 
 setup(
-  name="exo",
+  name="hanzo-net",
   version="0.0.1",
-  packages=find_packages(),
+  packages=find_packages(where="src"),
+  package_dir={"": "src"},
   install_requires=install_requires,
   extras_require=extras_require,
-  package_data={"exo": ["tinychat/**/*"]},
-  entry_points={"console_scripts": ["exo = exo.main:run"]},
+  package_data={"net": ["tinychat/**/*"]},
+  entry_points={"console_scripts": ["hanzo-net = net.main:run"]},
 )
