@@ -1,6 +1,6 @@
 import unittest
-from exo.models import get_supported_models, model_cards
-from exo.inference.inference_engine import inference_engine_classes
+from net.models import get_supported_models, model_cards
+from net.inference.inference_engine import inference_engine_classes
 from typing import NamedTuple
 
 class TestCase(NamedTuple):
