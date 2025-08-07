@@ -30,7 +30,7 @@ class TopologyViz:
     self.console = Console()
     self.layout = Layout()
     self.layout.split(Layout(name="main"), Layout(name="prompt_output", size=15), Layout(name="download", size=25))
-    self.main_panel = Panel(self._generate_main_layout(), title="Hanzo Cluster (0 nodes)", border_style="bright_yellow")
+    self.main_panel = Panel(self._generate_main_layout(), title="Hanzo Network (0 nodes)", border_style="bright_yellow")
     self.prompt_output_panel = Panel("", title="Prompt and Output", border_style="green")
     self.download_panel = Panel("", title="Download Progress", border_style="cyan")
     self.layout["main"].update(self.main_panel)
@@ -62,7 +62,7 @@ class TopologyViz:
     self.main_panel.renderable = self._generate_main_layout()
     # Update the panel title with the number of nodes and partitions
     node_count = len(self.topology.nodes)
-    self.main_panel.title = f"Hanzo Cluster ({node_count} node{'s' if node_count != 1 else ''})"
+    self.main_panel.title = f"Hanzo Network ({node_count} node{'s' if node_count != 1 else ''})"
 
     # Update and show/hide prompt and output panel
     if any(r[0] or r[1] for r in self.requests.values()):
@@ -178,26 +178,56 @@ class TopologyViz:
     )
 
   def _generate_main_layout(self) -> str:
+    # Get terminal dimensions for responsive layout
+    term_width = self.console.width - 4  # Account for panel borders
+    term_height = min(48, self.console.height - 10)  # Adaptive height
+    
+    # Adaptive sizing based on terminal width
+    if term_width < 60:
+      # Ultra-compact mode for very narrow terminals
+      viz_width = max(50, term_width)
+      radius_x = min(15, viz_width // 4)
+      radius_y = 6
+      term_height = min(36, term_height)  # Reduce height for compact mode
+    elif term_width < 80:
+      # Compact mode for narrow terminals
+      viz_width = max(60, term_width)
+      radius_x = min(20, viz_width // 4)
+      radius_y = 8
+      term_height = min(40, term_height)
+    elif term_width < 120:
+      # Medium mode
+      viz_width = min(100, term_width)
+      radius_x = min(25, viz_width // 3)
+      radius_y = 10
+    else:
+      # Full mode for wide terminals
+      viz_width = min(140, term_width)
+      radius_x = min(35, viz_width // 4)
+      radius_y = 12
+    
+    # Calculate center based on actual width
+    center_x = viz_width // 2
+    center_y = 24
+    
     # Calculate visualization parameters
     num_partitions = len(self.partitions)
-    radius_x = 30
-    radius_y = 12
-    center_x, center_y = 50, 24  # Increased center_y to add more space
 
-    # Generate visualization
-    visualization = [[" " for _ in range(100)] for _ in range(48)]  # Increased height to 48
+    # Generate visualization with adaptive width
+    visualization = [[" " for _ in range(viz_width)] for _ in range(term_height)]
 
     # Add exo_text at the top in bright yellow
     exo_lines = exo_text.split("\n")
     yellow_style = Style(color="bright_yellow")
-    max_line_length = max(len(line) for line in exo_lines)
+    max_line_length = max(len(line) for line in exo_lines) if exo_lines else 0
     for i, line in enumerate(exo_lines):
-      centered_line = line.center(max_line_length)
-      start_x = (100-max_line_length) // 2 + 15
-      colored_line = Text(centered_line, style=yellow_style)
-      for j, char in enumerate(str(colored_line)):
-        if 0 <= start_x + j < 100 and i < len(visualization):
-          visualization[i][start_x + j] = char
+      if line.strip():  # Only process non-empty lines
+        centered_line = line.center(max_line_length)
+        start_x = (viz_width - max_line_length) // 2
+        colored_line = Text(centered_line, style=yellow_style)
+        for j, char in enumerate(str(colored_line)):
+          if 0 <= start_x + j < viz_width and i < len(visualization):
+            visualization[i][start_x + j] = char
 
     # Display chatgpt_api_endpoints and web_chat_urls
     info_lines = []
@@ -208,18 +238,18 @@ class TopologyViz:
 
     info_start_y = len(exo_lines) + 1
     for i, line in enumerate(info_lines):
-      start_x = (100 - len(line)) // 2 + 15
+      start_x = (viz_width - len(line)) // 2
       for j, char in enumerate(line):
-        if 0 <= start_x + j < 100 and info_start_y + i < 48:
+        if 0 <= start_x + j < viz_width and info_start_y + i < term_height:
           visualization[info_start_y + i][start_x + j] = char
 
     # Calculate total FLOPS and position on the bar
     total_flops = sum(self.topology.nodes.get(partition.node_id, UNKNOWN_DEVICE_CAPABILITIES).flops.fp16 for partition in self.partitions)
     bar_pos = (math.tanh(total_flops**(1/3)/2.5 - 2) + 1)
 
-    # Add GPU poor/rich bar
-    bar_width = 30
-    bar_start_x = (100-bar_width) // 2
+    # Add GPU poor/rich bar (adaptive width)
+    bar_width = min(30, viz_width // 3)
+    bar_start_x = (viz_width - bar_width) // 2
     bar_y = info_start_y + len(info_lines) + 1
 
     # Create a gradient bar using emojis
@@ -230,21 +260,49 @@ class TopologyViz:
       gradient_bar.append(emojis[emoji_index])
 
     # Add the gradient bar to the visualization
-    visualization[bar_y][bar_start_x - 1] = "["
-    visualization[bar_y][bar_start_x + bar_width] = "]"
+    if bar_start_x - 1 >= 0:
+      visualization[bar_y][bar_start_x - 1] = "["
+    if bar_start_x + bar_width < viz_width:
+      visualization[bar_y][bar_start_x + bar_width] = "]"
     for i, segment in enumerate(str(gradient_bar)):
-      visualization[bar_y][bar_start_x + i] = segment
+      if bar_start_x + i < viz_width:
+        visualization[bar_y][bar_start_x + i] = segment
 
-    # Add labels
-    visualization[bar_y - 1][bar_start_x - 10:bar_start_x - 3] = "GPU poor"
-    visualization[bar_y - 1][bar_start_x + bar_width*2 + 2:bar_start_x + bar_width*2 + 11] = "GPU rich"
+    # Add labels (adjust for narrow terminals)
+    poor_label = "GPU poor"
+    rich_label = "GPU rich"
+    if viz_width < 80:
+      poor_label = "Poor"
+      rich_label = "Rich"
+    
+    # Place labels safely
+    poor_start = max(0, bar_start_x - len(poor_label) - 2)
+    rich_start = min(bar_start_x + bar_width + 2, viz_width - len(rich_label))
+    
+    for i, char in enumerate(poor_label):
+      if poor_start + i < viz_width:
+        visualization[bar_y - 1][poor_start + i] = char
+    for i, char in enumerate(rich_label):
+      if rich_start + i < viz_width:
+        visualization[bar_y - 1][rich_start + i] = char
 
     # Add position indicator and FLOPS value
     pos_x = bar_start_x + int(bar_pos*bar_width)
     flops_str = f"{total_flops:.2f} TFLOPS"
-    visualization[bar_y - 1][pos_x] = "▼"
-    visualization[bar_y + 1][pos_x - len(flops_str) // 2:pos_x + len(flops_str) // 2 + len(flops_str) % 2] = flops_str
-    visualization[bar_y + 2][pos_x] = "▲"
+    if viz_width < 80:
+      flops_str = f"{total_flops:.1f}TF"  # Shorter format for narrow terminals
+    
+    # Place indicator and text safely
+    if 0 <= pos_x < viz_width:
+      visualization[bar_y - 1][pos_x] = "▼"
+      visualization[bar_y + 2][pos_x] = "▲"
+    
+    # Center FLOPS text
+    flops_start = max(0, pos_x - len(flops_str) // 2)
+    flops_end = min(viz_width, flops_start + len(flops_str))
+    for i, char in enumerate(flops_str):
+      if flops_start + i < flops_end:
+        visualization[bar_y + 1][flops_start + i] = char
 
     # Add an extra empty line for spacing
     bar_y += 4
@@ -265,11 +323,22 @@ class TopologyViz:
         visualization[y][x] = "🔵"
 
       # Place node info (model, memory, TFLOPS, partition) on three lines
-      node_info = [
-        f"{device_capabilities.model} {device_capabilities.memory // 1024}GB",
-        f"{device_capabilities.flops.fp16}TFLOPS",
-        f"[{partition.start:.2f}-{partition.end:.2f}]",
-      ]
+      # Adjust format based on terminal width
+      if viz_width < 80:
+        # Compact format for narrow terminals
+        model_name = device_capabilities.model.split()[-1][:10]  # Shortened model name
+        node_info = [
+          f"{model_name} {device_capabilities.memory // 1024}GB",
+          f"{device_capabilities.flops.fp16:.1f}TF",
+          f"[{partition.start:.1f}-{partition.end:.1f}]",
+        ]
+      else:
+        # Full format for wider terminals
+        node_info = [
+          f"{device_capabilities.model} {device_capabilities.memory // 1024}GB",
+          f"{device_capabilities.flops.fp16}TFLOPS",
+          f"[{partition.start:.2f}-{partition.end:.2f}]",
+        ]
 
       # Calculate info position based on angle
       info_distance_x = radius_x + 6
@@ -278,21 +347,22 @@ class TopologyViz:
       info_y = int(center_y + info_distance_y*math.sin(angle))
 
       # Adjust text position to avoid overwriting the node icon and prevent cutoff
+      max_info_len = len(max(node_info, key=len))
       if info_x < x:
-        info_x = max(0, x - len(max(node_info, key=len)) - 1)
+        info_x = max(0, x - max_info_len - 1)
       elif info_x > x:
-        info_x = min(99 - len(max(node_info, key=len)), info_x)
+        info_x = min(viz_width - max_info_len - 1, info_x)
 
       # Adjust for top and bottom nodes
       if 5*math.pi/4 < angle < 7*math.pi/4:
-        info_x += 4
+        info_x = min(info_x + 4, viz_width - max_info_len - 1)
       elif math.pi/4 < angle < 3*math.pi/4:
-        info_x += 3
+        info_x = min(info_x + 3, viz_width - max_info_len - 1)
         info_y -= 2
 
       for j, line in enumerate(node_info):
         for k, char in enumerate(line):
-          if 0 <= info_y + j < 48 and 0 <= info_x + k < 100:
+          if 0 <= info_y + j < term_height and 0 <= info_x + k < viz_width:
             if info_y + j != y or info_x + k != x:
               visualization[info_y + j][info_x + k] = char
 
@@ -314,7 +384,7 @@ class TopologyViz:
       for step in range(1, steps):
         line_x = int(x + (next_x-x)*step/steps)
         line_y = int(y + (next_y-y)*step/steps)
-        if 0 <= line_y < 48 and 0 <= line_x < 100:
+        if 0 <= line_y < term_height and 0 <= line_x < viz_width:
           visualization[line_y][line_x] = "-"
 
       # Add connection description near the midpoint of the line
@@ -323,7 +393,7 @@ class TopologyViz:
       # Center the description text around the midpoint
       desc_start_x = mid_x - len(connection_description) // 2
       for j, char in enumerate(connection_description):
-        if 0 <= mid_y < 48 and 0 <= desc_start_x + j < 100:
+        if 0 <= mid_y < term_height and 0 <= desc_start_x + j < viz_width:
           visualization[mid_y][desc_start_x + j] = char
 
     # Convert to string
