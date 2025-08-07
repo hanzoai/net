@@ -202,7 +202,7 @@ class TopologyViz:
     # Display chatgpt_api_endpoints and web_chat_urls
     info_lines = []
     if len(self.web_chat_urls) > 0:
-      info_lines.append(f"Web Chat URL (tinychat): {' '.join(self.web_chat_urls[:1])}")
+      info_lines.append(f"Web Chat URL: {' '.join(self.web_chat_urls[:1])}")
     if len(self.chatgpt_api_endpoints) > 0:
       info_lines.append(f"ChatGPT API endpoint: {' '.join(self.chatgpt_api_endpoints[:1])}")
 
