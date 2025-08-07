@@ -30,7 +30,7 @@ class TopologyViz:
     self.console = Console()
     self.layout = Layout()
     self.layout.split(Layout(name="main"), Layout(name="prompt_output", size=15), Layout(name="download", size=25))
-    self.main_panel = Panel(self._generate_main_layout(), title="Exo Cluster (0 nodes)", border_style="bright_yellow")
+    self.main_panel = Panel(self._generate_main_layout(), title="Hanzo Cluster (0 nodes)", border_style="bright_yellow")
     self.prompt_output_panel = Panel("", title="Prompt and Output", border_style="green")
     self.download_panel = Panel("", title="Download Progress", border_style="cyan")
     self.layout["main"].update(self.main_panel)
@@ -62,7 +62,7 @@ class TopologyViz:
     self.main_panel.renderable = self._generate_main_layout()
     # Update the panel title with the number of nodes and partitions
     node_count = len(self.topology.nodes)
-    self.main_panel.title = f"Exo Cluster ({node_count} node{'s' if node_count != 1 else ''})"
+    self.main_panel.title = f"Hanzo Cluster ({node_count} node{'s' if node_count != 1 else ''})"
 
     # Update and show/hide prompt and output panel
     if any(r[0] or r[1] for r in self.requests.values()):

@@ -21,10 +21,11 @@ DEBUG_DISCOVERY = int(os.getenv("DEBUG_DISCOVERY", default="0"))
 VERSION = "0.0.1"
 
 exo_text = r"""
-  _____  _____  
- / _ \ \/ / _ \ 
-|  __/>  < (_) |
- \___/_/\_\___/ 
+ _   _    _    _   _ ________  
+| | | |  / \  | \ | |__  / _ \ 
+| |_| | / _ \ |  \| | / / | | |
+|  _  |/ ___ \| |\  |/ /| |_| |
+|_| |_/_/   \_\_| \_/____\___/ 
     """
 
 # Single shared thread pool for subprocess operations
@@ -44,7 +45,7 @@ def get_system_info():
 
 
 def find_available_port(host: str = "", min_port: int = 49152, max_port: int = 65535) -> int:
-  used_ports_file = os.path.join(tempfile.gettempdir(), "exo_used_ports")
+  used_ports_file = os.path.join(tempfile.gettempdir(), "hanzo_used_ports")
 
   def read_used_ports():
     if os.path.exists(used_ports_file):
@@ -83,6 +84,9 @@ def print_yellow_exo():
   yellow = "\033[93m"  # ANSI escape code for yellow
   reset = "\033[0m"  # ANSI escape code to reset color
   print(f"{yellow}{exo_text}{reset}")
+
+def print_yellow_hanzo():
+  print_yellow_exo()  # Alias for compatibility
 
 
 def terminal_link(uri, label=None):
@@ -317,7 +321,7 @@ async def get_interface_priority_and_type(ifname: str) -> Tuple[int, str]:
 async def shutdown(signal, loop, server):
   """Gracefully shutdown the server and close the asyncio loop."""
   print(f"Received exit signal {signal.name}...")
-  print("Thank you for using exo.")
+  print("Thank you for using Hanzo Net.")
   print_yellow_exo()
   server_tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
   [task.cancel() for task in server_tasks]
