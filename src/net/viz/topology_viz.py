@@ -252,10 +252,10 @@ class TopologyViz:
       # Create URL with best network IP
       web_url = f"http://{best_ip}:{port}"
       
-      # Add ChatGPT endpoint first
+      # Add Chat API endpoint first
       if len(self.chatgpt_api_endpoints) > 0:
         chatgpt_url = f"http://{best_ip}:{port}/v1/chat/completions"
-        info_lines.append(f"ChatGPT API endpoint: {chatgpt_url}")
+        info_lines.append(f"Chat API endpoint: {chatgpt_url}")
       
       # Then Web Chat URL
       info_lines.append(f"Web Chat URL: {web_url}")
