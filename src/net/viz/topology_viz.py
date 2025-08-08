@@ -258,8 +258,8 @@ class TopologyViz:
         import qrcode
         import io
         
-        # Create QR code with ASCII art output
-        qr = qrcode.QRCode(border=1)
+        # Create QR code with ASCII art output - smaller border for smaller QR
+        qr = qrcode.QRCode(border=0, box_size=1)
         qr.add_data(web_url)
         qr.make()
         
@@ -268,14 +268,13 @@ class TopologyViz:
         qr.print_ascii(out=f, tty=False, invert=False)
         qr_ascii = f.getvalue()
         
-        # Split into lines and clean up
-        qr_lines = qr_ascii.strip().split('\n')
+        # Split into lines and clean up - remove trailing whitespace for better alignment
+        qr_lines = [line.rstrip() for line in qr_ascii.strip().split('\n')]
         
         # Add QR code lines with label
         info_lines.append("")
         info_lines.append("📱 Scan QR code to join from mobile:")
         info_lines.extend(qr_lines)
-        info_lines.append("")
         
       except ImportError:
         # Fallback if qrcode not available
