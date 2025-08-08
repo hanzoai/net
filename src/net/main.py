@@ -339,12 +339,19 @@ async def main():
   atexit.register(restore_cursor)
 
   # Use a more direct approach to handle signals
-  def handle_exit():
-    asyncio.ensure_future(shutdown(signal.SIGTERM, loop, node.server))
+  shutdown_event = asyncio.Event()
+  
+  def handle_exit(sig):
+    # Don't print the stack trace on Ctrl-C
+    if sig == signal.SIGINT:
+      print()  # New line after ^C
+    shutdown_event.set()
+    # Create task for graceful shutdown
+    asyncio.create_task(shutdown(sig, loop, node.server))
 
   if platform.system() != "Windows":
     for s in [signal.SIGINT, signal.SIGTERM]:
-      loop.add_signal_handler(s, handle_exit)
+      loop.add_signal_handler(s, lambda: handle_exit(s))
 
   await node.start(wait_for_peers=args.wait_for_peers)
 
@@ -392,9 +399,15 @@ def run():
             loop = configure_uvloop()
             loop.run_until_complete(main())
         except KeyboardInterrupt:
-            print("\nShutdown requested... exiting")
+            pass  # Handled by signal handler
+        except Exception as e:
+            print(f"Error: {e}")
         finally:
-            if loop: loop.close()
+            if loop and not loop.is_closed(): 
+                try:
+                    loop.close()
+                except:
+                    pass
 
 if __name__ == "__main__":
   # When run directly, use synchronous version
@@ -403,6 +416,12 @@ if __name__ == "__main__":
       loop = configure_uvloop()
       loop.run_until_complete(main())
   except KeyboardInterrupt:
-      print("\nShutdown requested... exiting")
+      pass  # Handled by signal handler
+  except Exception as e:
+      print(f"Error: {e}")
   finally:
-      if loop: loop.close()
+      if loop and not loop.is_closed():
+          try:
+              loop.close()
+          except:
+              pass

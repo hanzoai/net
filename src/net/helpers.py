@@ -355,14 +355,28 @@ async def get_interface_priority_and_type(ifname: str) -> Tuple[int, str]:
 
 async def shutdown(signal, loop, server):
   """Gracefully shutdown the server and close the asyncio loop."""
-  print(f"Received exit signal {signal.name}...")
+  print(f"\nReceived exit signal {signal.name}...")
   print("Thank you for using Hanzo Net.")
   print_yellow_exo()
+  
+  # First stop the server to prevent new connections
+  try:
+    if server and hasattr(server, 'stop'):
+      await server.stop()
+  except Exception:
+    pass  # Ignore errors during server shutdown
+  
+  # Then cancel remaining tasks
   server_tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-  [task.cancel() for task in server_tasks]
-  print(f"Cancelling {len(server_tasks)} outstanding tasks")
-  await asyncio.gather(*server_tasks, return_exceptions=True)
-  await server.stop()
+  for task in server_tasks:
+    task.cancel()
+  
+  # Wait for tasks to complete with a timeout
+  if server_tasks:
+    await asyncio.wait(server_tasks, timeout=2.0)
+  
+  # Stop the event loop
+  loop.stop()
 
 
 def is_frozen():
