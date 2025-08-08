@@ -251,6 +251,13 @@ class TopologyViz:
       
       # Create URL with best network IP
       web_url = f"http://{best_ip}:{port}"
+      
+      # Add ChatGPT endpoint first
+      if len(self.chatgpt_api_endpoints) > 0:
+        chatgpt_url = f"http://{best_ip}:{port}/v1/chat/completions"
+        info_lines.append(f"ChatGPT API endpoint: {chatgpt_url}")
+      
+      # Then Web Chat URL
       info_lines.append(f"Web Chat URL: {web_url}")
       
       # Generate ASCII QR code for mobile access
@@ -259,7 +266,7 @@ class TopologyViz:
         import io
         
         # Create QR code with ASCII art output - smaller border for smaller QR
-        qr = qrcode.QRCode(border=0, box_size=1)
+        qr = qrcode.QRCode(border=1, box_size=1)
         qr.add_data(web_url)
         qr.make()
         
@@ -271,19 +278,20 @@ class TopologyViz:
         # Split into lines and clean up - remove trailing whitespace for better alignment
         qr_lines = [line.rstrip() for line in qr_ascii.strip().split('\n')]
         
-        # Add QR code lines with label
-        info_lines.append("")
+        # Add QR code lines with label and spacing
+        info_lines.append("")  # Space before QR label
         info_lines.append("📱 Scan QR code to join from mobile:")
+        info_lines.append("")  # Space before QR code
         info_lines.extend(qr_lines)
+        info_lines.append("")  # Space after QR code
         
       except ImportError:
         # Fallback if qrcode not available
+        info_lines.append("")
         info_lines.append("📱 Mobile: Open web browser and navigate to above URL")
       except Exception as e:
+        info_lines.append("")
         info_lines.append(f"📱 Mobile access available at: {web_url}")
-        
-    if len(self.chatgpt_api_endpoints) > 0:
-      info_lines.append(f"ChatGPT API endpoint: {' '.join(self.chatgpt_api_endpoints[:1])}")
 
     info_start_y = len(exo_lines) + 1
     for i, line in enumerate(info_lines):
