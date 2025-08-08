@@ -276,7 +276,14 @@ class TopologyViz:
         qr_ascii = f.getvalue()
         
         # Split into lines and clean up - remove trailing whitespace for better alignment
-        qr_lines = [line.rstrip() for line in qr_ascii.strip().split('\n')]
+        qr_lines = qr_ascii.strip().split('\n')
+        
+        # Fix the first line alignment issue - qrcode library sometimes omits leading space
+        if qr_lines and not qr_lines[0].startswith(' '):
+          qr_lines[0] = ' ' + qr_lines[0]
+        
+        # Now clean up trailing whitespace
+        qr_lines = [line.rstrip() for line in qr_lines]
         
         # Add QR code lines with label and spacing
         info_lines.append("")  # Space before QR label
