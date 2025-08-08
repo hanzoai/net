@@ -252,13 +252,11 @@ class TopologyViz:
       # Create URL with best network IP
       web_url = f"http://{best_ip}:{port}"
       
-      # Add Chat API endpoint first
-      if len(self.chatgpt_api_endpoints) > 0:
-        chatgpt_url = f"http://{best_ip}:{port}/v1/chat/completions"
-        info_lines.append(f"Chat API endpoint: {chatgpt_url}")
-      
-      # Then Web Chat URL
+      # Add both URLs at the top
       info_lines.append(f"Web Chat URL: {web_url}")
+      if len(self.chatgpt_api_endpoints) > 0:
+        api_url = f"http://{best_ip}:{port}/v1/chat/completions"
+        info_lines.append(f"API endpoint: {api_url}")
       
       # Generate ASCII QR code for mobile access
       try:
