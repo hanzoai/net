@@ -67,8 +67,8 @@ parser.add_argument("--batch-size", type=int, default=1, help="Minibatch size.")
 parser.add_argument("--resume-checkpoint", type=str, default=None, help="Path to a custom checkpoint to load")
 parser.add_argument("--save-checkpoint-dir", type=str, default="checkpoints", help="Path to a folder where checkpoints are stored")
 parser.add_argument("--node-id", type=str, default=None, help="Node ID")
-parser.add_argument("--node-host", type=str, default="0.0.0.0", help="Node host")
-parser.add_argument("--node-port", type=int, default=None, help="Node port")
+parser.add_argument("--node-host", "--host", type=str, default=os.environ.get("HOST", "0.0.0.0"), help="Node host (can also use HOST env var)")
+parser.add_argument("--node-port", "--port", type=int, default=os.environ.get("PORT", None), help="Node port (can also use PORT env var)")
 parser.add_argument("--models-seed-dir", type=str, default=None, help="Model seed directory")
 parser.add_argument("--listen-port", type=int, default=5678, help="Listening port for discovery")
 parser.add_argument("--download-quick-check", action="store_true", help="Quick check local path for model shards download")
@@ -92,7 +92,8 @@ parser.add_argument("--node-id-filter", type=str, default=None, help="Comma sepa
 parser.add_argument("--interface-type-filter", type=str, default=None, help="Comma separated list of allowed interface types (only for UDP discovery)")
 parser.add_argument("--system-prompt", type=str, default=None, help="System prompt for the ChatGPT API")
 args = parser.parse_args()
-print(f"Selected inference engine: {args.inference_engine}")
+if args.inference_engine:
+    print(f"Selected inference engine: {args.inference_engine}")
 
 print_yellow_exo()
 

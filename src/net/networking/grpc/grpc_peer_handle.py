@@ -1,3 +1,7 @@
+import warnings
+# Suppress protobuf version mismatch warning
+warnings.filterwarnings('ignore', category=UserWarning, module='google.protobuf.runtime_version')
+
 import grpc
 import numpy as np
 import asyncio

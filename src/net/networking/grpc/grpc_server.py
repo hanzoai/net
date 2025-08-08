@@ -1,3 +1,7 @@
+import warnings
+# Suppress protobuf version mismatch warning
+warnings.filterwarnings('ignore', category=UserWarning, module='google.protobuf.runtime_version')
+
 import grpc
 from concurrent import futures
 import numpy as np
