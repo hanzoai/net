@@ -232,7 +232,25 @@ class TopologyViz:
     # Display chatgpt_api_endpoints and web_chat_urls
     info_lines = []
     if len(self.web_chat_urls) > 0:
-      web_url = self.web_chat_urls[0]
+      # Import helper to get best network IP
+      from net.helpers import get_best_network_ip
+      
+      # Get the best network IP for mobile access
+      best_ip = get_best_network_ip()
+      
+      # Extract port from first URL
+      port = 52415  # default
+      if self.web_chat_urls[0]:
+        try:
+          from urllib.parse import urlparse
+          parsed = urlparse(self.web_chat_urls[0])
+          if parsed.port:
+            port = parsed.port
+        except:
+          pass
+      
+      # Create URL with best network IP
+      web_url = f"http://{best_ip}:{port}"
       info_lines.append(f"Web Chat URL: {web_url}")
       
       # Generate ASCII QR code for mobile access
