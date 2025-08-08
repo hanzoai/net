@@ -122,3 +122,5 @@ src/net/viz/test_topology_viz.py
 src/net/viz/topology_viz.py
 test/test_model_helpers.py
 test/test_tokenizers.py
+tests/test_browser_e2e.py
+tests/test_e2e_qr_mobile.py
