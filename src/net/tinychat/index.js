@@ -47,10 +47,22 @@ document.addEventListener("alpine:init", () => {
 
     // Add these new properties
     expandedGroups: {},
+    
+    // Platform capabilities
+    platformInfo: {
+      isMobile: false,
+      hasWebGPU: false,
+      hasOffscreenCanvas: false,
+      userAgent: '',
+      accelerationSupported: []
+    },
 
-    init() {
+    async init() {
       // Clean up any pending messages
       localStorage.removeItem("pendingMessage");
+
+      // Detect platform capabilities
+      await this.detectPlatformCapabilities();
 
       // Get initial model list
       this.fetchInitialModels();
@@ -60,6 +72,55 @@ document.addEventListener("alpine:init", () => {
 
       // Start model polling with the new pattern
       this.startModelPolling();
+    },
+
+    async detectPlatformCapabilities() {
+      // Detect mobile
+      this.platformInfo.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      this.platformInfo.userAgent = navigator.userAgent;
+
+      // Detect WebGPU support
+      try {
+        if ('gpu' in navigator) {
+          const adapter = await navigator.gpu.requestAdapter();
+          this.platformInfo.hasWebGPU = !!adapter;
+          if (adapter) {
+            this.platformInfo.accelerationSupported.push('WebGPU');
+            console.log('🚀 WebGPU available for mobile AI acceleration');
+          }
+        }
+      } catch (error) {
+        console.log('WebGPU not available:', error);
+        this.platformInfo.hasWebGPU = false;
+      }
+
+      // Detect OffscreenCanvas support
+      this.platformInfo.hasOffscreenCanvas = typeof OffscreenCanvas !== 'undefined';
+      if (this.platformInfo.hasOffscreenCanvas) {
+        this.platformInfo.accelerationSupported.push('OffscreenCanvas');
+      }
+
+      // Detect WebAssembly SIMD
+      try {
+        if (typeof WebAssembly !== 'undefined' && WebAssembly.validate) {
+          // Simple WASM SIMD detection
+          const wasmSimd = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123]);
+          if (WebAssembly.validate(wasmSimd)) {
+            this.platformInfo.accelerationSupported.push('WASM-SIMD');
+          }
+        }
+      } catch (error) {
+        console.log('WASM SIMD detection failed:', error);
+      }
+
+      // Log platform capabilities
+      console.log('📱 Platform capabilities:', this.platformInfo);
+      
+      // Show mobile-specific UI hints if on mobile
+      if (this.platformInfo.isMobile) {
+        console.log('📱 Mobile device detected - optimizing UI for touch');
+        // You can add mobile-specific optimizations here
+      }
     },
 
     async fetchInitialModels() {

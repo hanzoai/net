@@ -20,7 +20,10 @@ tqdm==4.66.4
 transformers==4.46.3
 uuid==1.30
 uvloop==0.21.0
-tinygrad@ git+https://github.com/tinygrad/tinygrad.git@ec120ce6b9ce8e4ff4b5692566a683ef240e8bc8
+tinygrad>=0.10.0
+tokenizers>=0.20.0
+huggingface-hub>=0.20.0
+qrcode[pil]>=7.0.0
 mlx>=0.22.0
 mlx-lm>=0.21.1
 

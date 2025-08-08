@@ -56,7 +56,7 @@ def configure_uvloop():
     return loop
 
 # parse args
-parser = argparse.ArgumentParser(description="Initialize GRPC Discovery")
+parser = argparse.ArgumentParser(prog="hanzo-net", description="Hanzo Network - Distributed AI Compute")
 parser.add_argument("command", nargs="?", choices=["run", "eval", "train"], help="Command to run")
 parser.add_argument("model_name", nargs="?", help="Model name to run")
 parser.add_argument("--default-model", type=str, default=None, help="Default model")
@@ -379,14 +379,30 @@ async def main():
       await asyncio.sleep(.1)
 
 def run():
-    loop = None
+    """Run the main function, handling event loop setup."""
+    # Check if we're already in an async context
     try:
-        loop = configure_uvloop()
-        loop.run_until_complete(main())
-    except KeyboardInterrupt:
-        print("\nShutdown requested... exiting")
-    finally:
-        if loop: loop.close()
+        loop = asyncio.get_running_loop()
+        # We're already in an async context, just return the coroutine
+        return main()
+    except RuntimeError:
+        # No running loop, create one
+        loop = None
+        try:
+            loop = configure_uvloop()
+            loop.run_until_complete(main())
+        except KeyboardInterrupt:
+            print("\nShutdown requested... exiting")
+        finally:
+            if loop: loop.close()
 
 if __name__ == "__main__":
-  run()
+  # When run directly, use synchronous version
+  loop = None
+  try:
+      loop = configure_uvloop()
+      loop.run_until_complete(main())
+  except KeyboardInterrupt:
+      print("\nShutdown requested... exiting")
+  finally:
+      if loop: loop.close()

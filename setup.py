@@ -29,7 +29,10 @@ install_requires = [
   "transformers==4.46.3",
   "uuid==1.30",
   "uvloop==0.21.0",
-  "tinygrad @ git+https://github.com/tinygrad/tinygrad.git@ec120ce6b9ce8e4ff4b5692566a683ef240e8bc8",
+  "tinygrad>=0.10.0",  # Using PyPI version instead of git
+  "tokenizers>=0.20.0",  # Required for transformers
+  "huggingface-hub>=0.20.0",  # Required for model downloads
+  "qrcode[pil]>=7.0.0",  # For QR code generation
 ]
 
 extras_require = {
@@ -43,9 +46,16 @@ extras_require = {
   "amd-gpu": ["pyrsmi==0.2.0"],
 }
 
-# Check if running on macOS with Apple Silicon
-if sys.platform.startswith("darwin") and platform.machine() == "arm64":
-  install_requires.extend(extras_require["apple_silicon"])
+# Handle MLX installation based on platform
+if sys.platform.startswith("darwin"):
+  if platform.machine() == "arm64":
+    # Apple Silicon - add MLX support automatically
+    install_requires.extend(extras_require["apple_silicon"])
+    print("✅ Apple Silicon detected - MLX support enabled")
+  else:
+    # Intel Mac - MLX not available, inform user
+    print("ℹ️  Intel Mac detected - MLX not available (Apple Silicon only)")
+    print("   Hanzo Net will work with CPU and other acceleration backends")
 
 # Check if running Windows
 if sys.platform.startswith("win32"):
@@ -80,11 +90,53 @@ _add_gpu_requires()
 
 setup(
   name="hanzo-net",
-  version="0.0.1",
+  version="0.1.6",
+  description="Hanzo Network - Distributed AI compute network for running models locally and remotely",
+  author="Hanzo AI",
+  author_email="dev@hanzo.ai",
+  url="https://github.com/hanzoai/net",
   packages=find_packages(where="src"),
   package_dir={"": "src"},
   install_requires=install_requires,
   extras_require=extras_require,
   package_data={"net": ["tinychat/**/*"]},
   entry_points={"console_scripts": ["hanzo-net = net.main:run"]},
+  classifiers=[
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+  ],
+  long_description="""
+Hanzo Network - Distributed AI compute network for running models locally and remotely.
+
+**Platform Support:**
+- Linux: Full support
+- macOS Intel (x86_64): Full support (CPU/GPU acceleration)
+- macOS Apple Silicon (ARM64): Full support with MLX acceleration
+- Windows: Experimental support
+- Mobile: Web interface with WebGPU support (iOS/Android browsers)
+
+**Mobile Access:**
+Mobile devices can join the network via web interface with:
+- WebGPU acceleration where supported
+- QR code for easy network joining
+- Responsive web UI optimized for mobile
+
+**Installation:**
+```bash
+pip install hanzo-net
+```
+
+**Usage:**
+```bash
+hanzo net  # Starts node with QR code for mobile access
+```
+""",
+  long_description_content_type="text/markdown",
+  python_requires=">=3.10",
 )
