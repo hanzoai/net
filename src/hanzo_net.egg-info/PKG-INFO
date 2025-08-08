@@ -1,6 +1,20 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: hanzo-net
-Version: 0.0.1
+Version: 0.1.6
+Summary: Hanzo Network - Distributed AI compute network for running models locally and remotely
+Home-page: https://github.com/hanzoai/net
+Author: Hanzo AI
+Author-email: dev@hanzo.ai
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: aiohttp==3.10.11
 Requires-Dist: aiohttp_cors==0.7.0
@@ -25,7 +39,10 @@ Requires-Dist: tqdm==4.66.4
 Requires-Dist: transformers==4.46.3
 Requires-Dist: uuid==1.30
 Requires-Dist: uvloop==0.21.0
-Requires-Dist: tinygrad@ git+https://github.com/tinygrad/tinygrad.git@ec120ce6b9ce8e4ff4b5692566a683ef240e8bc8
+Requires-Dist: tinygrad>=0.10.0
+Requires-Dist: tokenizers>=0.20.0
+Requires-Dist: huggingface-hub>=0.20.0
+Requires-Dist: qrcode[pil]>=7.0.0
 Requires-Dist: mlx>=0.22.0
 Requires-Dist: mlx-lm>=0.21.1
 Provides-Extra: formatting
@@ -39,3 +56,40 @@ Provides-Extra: nvidia-gpu
 Requires-Dist: nvidia-ml-py==12.560.30; extra == "nvidia-gpu"
 Provides-Extra: amd-gpu
 Requires-Dist: pyrsmi==0.2.0; extra == "amd-gpu"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+
+Hanzo Network - Distributed AI compute network for running models locally and remotely.
+
+**Platform Support:**
+- Linux: Full support
+- macOS Intel (x86_64): Full support (CPU/GPU acceleration)
+- macOS Apple Silicon (ARM64): Full support with MLX acceleration
+- Windows: Experimental support
+- Mobile: Web interface with WebGPU support (iOS/Android browsers)
+
+**Mobile Access:**
+Mobile devices can join the network via web interface with:
+- WebGPU acceleration where supported
+- QR code for easy network joining
+- Responsive web UI optimized for mobile
+
+**Installation:**
+```bash
+pip install hanzo-net
+```
+
+**Usage:**
+```bash
+hanzo net  # Starts node with QR code for mobile access
+```

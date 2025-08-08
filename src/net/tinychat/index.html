@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <head>
-<title>tinychat</title>
+<title>Hanzo Chat</title>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
 <script defer="" src="/static/cdn.jsdelivr.net/npm/@alpine-collective/toolkit@1.0.2/dist/cdn.min.js"></script>
@@ -167,7 +167,7 @@
       if (home === 1) setTimeout(() =&gt; home = 2, 100);
       if (home === -1) setTimeout(() =&gt; home = 0, 100);
     " x-show="home === 0" x-transition="">
-<h1 class="title megrim-regular">tinychat</h1>
+<h1 class="title megrim-regular">Hanzo Chat</h1>
 <template x-if="histories.length">
   <button
     @click="if(confirm('Are you sure you want to clear all history?')) clearAllHistory();"

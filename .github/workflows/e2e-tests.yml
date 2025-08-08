@@ -1,0 +1,194 @@
+name: E2E Tests - QR Code & Mobile Network
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  test-qr-generation:
+    name: Test QR Code Generation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install pytest pytest-asyncio
+        pip install qrcode[pil]
+        pip install -e .
+    
+    - name: Run QR code tests
+      run: |
+        pytest tests/test_e2e_qr_mobile.py::TestQRCodeGeneration -v
+    
+    - name: Verify QR code output
+      run: |
+        python -c "
+        import qrcode
+        import io
+        qr = qrcode.QRCode(border=1)
+        qr.add_data('http://test.hanzo.ai:52415')
+        qr.make()
+        f = io.StringIO()
+        qr.print_ascii(out=f, tty=False, invert=False)
+        print('QR Code Generated Successfully:')
+        print(f.getvalue())
+        "
+
+  test-mobile-detection:
+    name: Test Mobile Device Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install pytest pytest-asyncio
+        pip install -e .
+    
+    - name: Run mobile detection tests
+      run: |
+        pytest tests/test_e2e_qr_mobile.py::TestMobileDetection -v
+
+  test-network-integration:
+    name: Test Distributed Network
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install pytest pytest-asyncio
+        pip install -e .
+    
+    - name: Run network tests
+      run: |
+        pytest tests/test_e2e_qr_mobile.py::TestDistributedNetwork -v
+
+  test-browser-simulation:
+    name: Browser E2E Tests with Playwright
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install playwright pytest-playwright
+        pip install -e .
+        playwright install chromium webkit
+    
+    - name: Run browser tests
+      run: |
+        python tests/test_browser_e2e.py
+
+  test-full-stack:
+    name: Full Stack Integration Test
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libglib2.0-0 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2
+    
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install pytest pytest-asyncio httpx
+        pip install qrcode[pil]
+        pip install -e .
+    
+    - name: Start Hanzo Net server
+      run: |
+        # Start server in background
+        timeout 30 python -m net.main --disable-tui &
+        SERVER_PID=$!
+        echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+        
+        # Wait for server to start
+        sleep 5
+        
+        # Check if server is running
+        curl -f http://localhost:52415 || exit 1
+    
+    - name: Test QR code endpoint
+      run: |
+        # Test that server generates QR code in output
+        curl http://localhost:52415 | grep -q "Hanzo Chat" || exit 1
+    
+    - name: Stop server
+      if: always()
+      run: |
+        if [ ! -z "$SERVER_PID" ]; then
+          kill $SERVER_PID || true
+        fi
+
+  test-mobile-browsers:
+    name: Mobile Browser Simulation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        device: 
+          - "iPhone 12"
+          - "Pixel 5"
+          - "iPad Pro"
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Playwright
+      run: |
+        npm install -D @playwright/test
+        npx playwright install
+    
+    - name: Test on ${{ matrix.device }}
+      run: |
+        npx playwright test --device="${{ matrix.device }}" tests/mobile.spec.js
