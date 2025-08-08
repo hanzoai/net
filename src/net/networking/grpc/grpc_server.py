@@ -1,6 +1,7 @@
 import grpc
 from concurrent import futures
 import numpy as np
+import asyncio
 from asyncio import CancelledError
 
 import platform
@@ -53,11 +54,16 @@ class GRPCServer(node_service_pb2_grpc.NodeServiceServicer):
   async def stop(self) -> None:
     if self.server:
       try:
-        await self.server.stop(grace=5)
-        await self.server.wait_for_termination()
-      except CancelledError:
-        pass
-      if DEBUG >= 1: print("Server stopped and all connections are closed")
+        # Stop accepting new connections immediately
+        await self.server.stop(grace=1.0)
+        # Don't wait for termination to avoid hanging
+      except (CancelledError, RuntimeError, asyncio.CancelledError):
+        pass  # Expected during shutdown
+      except Exception:
+        pass  # Ignore any other errors during shutdown
+      finally:
+        self.server = None
+        if DEBUG >= 1: print("Server stopped")
 
   async def SendPrompt(self, request, context):
     shard = Shard(
