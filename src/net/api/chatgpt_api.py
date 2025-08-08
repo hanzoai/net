@@ -217,6 +217,8 @@ class ChatGPTAPI:
     cors.add(self.app.router.add_post("/v1/chat/token/encode", self.handle_post_chat_token_encode), {"*": cors_options})
     cors.add(self.app.router.add_post("/chat/completions", self.handle_post_chat_completions), {"*": cors_options})
     cors.add(self.app.router.add_post("/v1/chat/completions", self.handle_post_chat_completions), {"*": cors_options})
+    cors.add(self.app.router.add_get("/chat/completions", self.handle_get_chat_completions), {"*": cors_options})
+    cors.add(self.app.router.add_get("/v1/chat/completions", self.handle_get_chat_completions), {"*": cors_options})
     cors.add(self.app.router.add_post("/v1/image/generations", self.handle_post_image_generations), {"*": cors_options})
     cors.add(self.app.router.add_get("/v1/download/progress", self.handle_get_download_progress), {"*": cors_options})
     cors.add(self.app.router.add_get("/modelpool", self.handle_model_support), {"*": cors_options})
@@ -320,6 +322,28 @@ class ChatGPTAPI:
       else:
         print(f"Unknown progress event type: {type(progress_event)}. {progress_event}")
     return web.json_response(progress_data)
+
+  async def handle_get_chat_completions(self, request):
+    """Handle GET requests to chat completions endpoint - return API info"""
+    models = await self.handle_get_models(request)
+    models_data = json.loads(models.text) if hasattr(models, 'text') else []
+    
+    return web.json_response({
+      "message": "Hanzo Network Chat API",
+      "version": VERSION,
+      "endpoint": "/v1/chat/completions",
+      "method": "POST",
+      "models": models_data,
+      "example": {
+        "model": self.default_model or "llama-3.2-3b",
+        "messages": [
+          {"role": "user", "content": "Hello!"}
+        ],
+        "temperature": 0.7,
+        "stream": False
+      },
+      "documentation": "Send POST request with JSON body to use this endpoint"
+    })
 
   async def handle_post_chat_completions(self, request):
     data = await request.json()
