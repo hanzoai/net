@@ -250,6 +250,41 @@ def get_all_ip_addresses_and_interfaces():
       return [("localhost", "lo")]
     return list(set(ip_addresses))
 
+def get_best_network_ip():
+    """Get the best network IP for external access (not localhost/127.0.0.1)"""
+    ips = get_all_ip_addresses_and_interfaces()
+    
+    # Filter out localhost and 127.0.0.1
+    non_local_ips = [(ip, iface) for ip, iface in ips if ip not in ('localhost', '127.0.0.1', '::1')]
+    
+    if non_local_ips:
+        # Prefer common private network ranges in order:
+        # 1. 192.168.x.x (home networks)
+        # 2. 10.x.x.x (corporate networks)  
+        # 3. 172.16-31.x.x (less common private)
+        for ip, iface in non_local_ips:
+            if ip.startswith('192.168.'):
+                return ip
+        for ip, iface in non_local_ips:
+            if ip.startswith('10.'):
+                return ip
+        for ip, iface in non_local_ips:
+            if ip.startswith('172.'):
+                parts = ip.split('.')
+                if len(parts) >= 2:
+                    second_octet = int(parts[1])
+                    if 16 <= second_octet <= 31:
+                        return ip
+        # If no private IP, return the first non-local IP
+        return non_local_ips[0][0]
+    
+    # Fallback to first available IP
+    if ips:
+        return ips[0][0]
+    
+    # Last resort
+    return "localhost"
+
 
 
 async def get_macos_interface_type(ifname: str) -> Optional[Tuple[int, str]]:
