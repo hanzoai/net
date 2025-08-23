@@ -233,7 +233,7 @@ class ChatGPTAPI:
 
     # Add static routes
     if "__compiled__" not in globals():
-      self.static_dir = Path(__file__).parent.parent/"tinychat"
+      self.static_dir = Path(__file__).parent.parent/"netchat"
       self.app.router.add_get("/", self.handle_root)
       self.app.router.add_static("/", self.static_dir, name="static")
       

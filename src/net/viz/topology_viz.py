@@ -182,29 +182,45 @@ class TopologyViz:
     term_width = self.console.width - 4  # Account for panel borders
     term_height = min(48, self.console.height - 10)  # Adaptive height
     
+    # Detect if we're in compact mode
+    compact_mode = term_width < 80
+    mobile_mode = term_width < 60
+    
     # Adaptive sizing based on terminal width
-    if term_width < 60:
-      # Ultra-compact mode for very narrow terminals
+    if mobile_mode:
+      # Mobile mode for phones/very narrow terminals
+      viz_width = max(40, term_width)
+      radius_x = min(12, viz_width // 4)
+      radius_y = 5
+      term_height = min(35, term_height)  # Reasonable height for mobile
+      show_qr = True  # Keep QR code even on mobile
+      show_logo = False  # No large logo on mobile
+      qr_position = 'below'  # Position QR below URLs
+    elif compact_mode:
+      # Compact mode for narrow terminals  
       viz_width = max(50, term_width)
-      radius_x = min(15, viz_width // 4)
-      radius_y = 6
-      term_height = min(36, term_height)  # Reduce height for compact mode
-    elif term_width < 80:
-      # Compact mode for narrow terminals
-      viz_width = max(60, term_width)
-      radius_x = min(20, viz_width // 4)
-      radius_y = 8
+      radius_x = min(18, viz_width // 4)
+      radius_y = 7
       term_height = min(40, term_height)
+      show_qr = True  # Keep QR in compact mode
+      show_logo = True  # Keep logo but smaller
+      qr_position = 'below'  # Position QR below URLs
     elif term_width < 120:
       # Medium mode
       viz_width = min(100, term_width)
       radius_x = min(25, viz_width // 3)
       radius_y = 10
+      show_qr = True
+      show_logo = True
+      qr_position = 'right'  # QR on right side
     else:
       # Full mode for wide terminals
       viz_width = min(140, term_width)
       radius_x = min(35, viz_width // 4)
       radius_y = 12
+      show_qr = True
+      show_logo = True
+      qr_position = 'right'  # QR on right side
     
     # Calculate center based on actual width
     center_x = viz_width // 2
@@ -216,21 +232,54 @@ class TopologyViz:
     # Generate visualization with adaptive width
     visualization = [[" " for _ in range(viz_width)] for _ in range(term_height)]
 
-    # Add exo_text at the top in bright yellow
-    exo_lines = exo_text.split("\n")
+    # Add logo/title based on mode
     yellow_style = Style(color="bright_yellow")
-    max_line_length = max(len(line) for line in exo_lines) if exo_lines else 0
-    for i, line in enumerate(exo_lines):
-      if line.strip():  # Only process non-empty lines
-        centered_line = line.center(max_line_length)
-        start_x = (viz_width - max_line_length) // 2
-        colored_line = Text(centered_line, style=yellow_style)
-        for j, char in enumerate(str(colored_line)):
-          if 0 <= start_x + j < viz_width and i < len(visualization):
-            visualization[i][start_x + j] = char
+    
+    if mobile_mode:
+      # Simple text title for mobile
+      title = "HANZO"
+      version = f"v{self._get_version_string()}"
+      start_x = (viz_width - len(title)) // 2
+      start_y = 1
+      for j, char in enumerate(title):
+        if 0 <= start_x + j < viz_width:
+          visualization[start_y][start_x + j] = char
+      # Add version below
+      version_x = (viz_width - len(version)) // 2
+      for j, char in enumerate(version):
+        if 0 <= version_x + j < viz_width:
+          visualization[start_y + 1][version_x + j] = char
+    elif compact_mode:
+      # Smaller ASCII art for compact mode
+      compact_logo = [
+        "HANZO",
+        "━━━━━"
+      ]
+      for i, line in enumerate(compact_logo):
+        if i + 1 < len(visualization):
+          start_x = (viz_width - len(line)) // 2
+          for j, char in enumerate(line):
+            if 0 <= start_x + j < viz_width:
+              visualization[i + 1][start_x + j] = char
+    elif show_logo:
+      # Full ASCII art logo for normal/wide mode
+      exo_lines = exo_text.split("\n")
+      max_line_length = max(len(line) for line in exo_lines) if exo_lines else 0
+      for i, line in enumerate(exo_lines):
+        if line.strip():  # Only process non-empty lines
+          centered_line = line.center(max_line_length)
+          start_x = (viz_width - max_line_length) // 2
+          colored_line = Text(centered_line, style=yellow_style)
+          for j, char in enumerate(str(colored_line)):
+            if 0 <= start_x + j < viz_width and i < len(visualization):
+              visualization[i][start_x + j] = char
 
-    # Display chatgpt_api_endpoints and web_chat_urls
-    info_lines = []
+    # Prepare QR code and URLs first to know dimensions
+    qr_lines = []
+    qr_width = 0
+    web_url = ""
+    api_url = ""
+    
     if len(self.web_chat_urls) > 0:
       # Import helper to get best network IP
       from net.helpers import get_best_network_ip
@@ -240,7 +289,7 @@ class TopologyViz:
       
       # Extract port from first URL
       port = 52415  # default
-      if self.web_chat_urls[0]:
+      if self.web_chat_urls and len(self.web_chat_urls) > 0 and self.web_chat_urls[0]:
         try:
           from urllib.parse import urlparse
           parsed = urlparse(self.web_chat_urls[0])
@@ -249,140 +298,357 @@ class TopologyViz:
         except:
           pass
       
-      # Create URL with best network IP
+      # Create URLs with best network IP
       web_url = f"http://{best_ip}:{port}"
-      
-      # Add both URLs at the top
-      info_lines.append(f"Web Chat URL: {web_url}")
       if len(self.chatgpt_api_endpoints) > 0:
         api_url = f"http://{best_ip}:{port}/v1/chat/completions"
-        info_lines.append(f"API endpoint: {api_url}")
       
-      # Generate ASCII QR code for mobile access
+      # Generate QR code if enabled
+      if show_qr:
+        try:
+          import qrcode
+          import io
+          
+          # Create QR code with ASCII art output - smaller border for smaller QR
+          qr = qrcode.QRCode(border=1, box_size=1)
+          qr.add_data(web_url)
+          qr.make()
+          
+          # Use the built-in ASCII art generation with proper block characters
+          f = io.StringIO()
+          qr.print_ascii(out=f, tty=False, invert=False)
+          qr_ascii = f.getvalue()
+          
+          # Split into lines and clean up
+          qr_lines = qr_ascii.strip().split('\n')
+          
+          # Fix the first line alignment issue
+          if qr_lines and not qr_lines[0].startswith(' '):
+            qr_lines[0] = ' ' + qr_lines[0]
+          
+          # Clean up trailing whitespace
+          qr_lines = [line.rstrip() for line in qr_lines]
+          
+          # Calculate QR code width
+          qr_width = max(len(line) for line in qr_lines) if qr_lines else 0
+          
+        except ImportError:
+          qr_lines = []
+          qr_width = 0
+        except Exception as e:
+          qr_lines = []
+          qr_width = 0
+      else:
+        # No QR code in compact mode
+        qr_lines = []
+        qr_width = 0
+    
+    # Add version information below the logo
+    if mobile_mode:
+      info_start_y = 3
+    elif compact_mode:
+      info_start_y = 4
+    else:
+      info_start_y = len(exo_text.split('\n')) + 1
+    version_line = ""
+    
+    # Skip version display in mobile mode (already shown with title)
+    if not mobile_mode:
       try:
-        import qrcode
-        import io
+        # Get hanzo-net version
+        import importlib.metadata
+        try:
+          hanzo_net_version = importlib.metadata.version('hanzo-net')
+        except:
+          hanzo_net_version = "dev"
         
-        # Create QR code with ASCII art output - smaller border for smaller QR
-        qr = qrcode.QRCode(border=1, box_size=1)
-        qr.add_data(web_url)
-        qr.make()
+        # Try to get hanzo CLI version if available
+        try:
+          hanzo_version = importlib.metadata.version('hanzo')
+          version_line = f"hanzo v{hanzo_version} | hanzo-net v{hanzo_net_version}"
+        except:
+          version_line = f"hanzo-net v{hanzo_net_version}"
         
-        # Use the built-in ASCII art generation with proper block characters
-        f = io.StringIO()
-        qr.print_ascii(out=f, tty=False, invert=False)
-        qr_ascii = f.getvalue()
+        # Center the version line
+        start_x = (viz_width - len(version_line)) // 2
+        for j, char in enumerate(version_line):
+          if 0 <= start_x + j < viz_width:
+            visualization[info_start_y][start_x + j] = char
+        info_start_y += 2
+      except:
+        pass
+    
+    # Responsive URL and QR display
+    if mobile_mode:
+      # Mobile: Compact URL display at top, QR below
+      url_y = info_start_y
+      if web_url:
+        # Extract just IP and port for mobile
+        from urllib.parse import urlparse
+        parsed = urlparse(web_url)
+        compact_url = f"{parsed.netloc}"
+        # Center the URL
+        url_x = (viz_width - len(compact_url)) // 2
+        for j, char in enumerate(compact_url):
+          if 0 <= url_x + j < viz_width and url_y < term_height:
+            visualization[url_y][url_x + j] = char
+        url_y += 2
+      
+      # Add QR code below URL in mobile mode
+      if qr_lines and show_qr:
+        # Center the QR code
+        qr_start_x = max(0, (viz_width - qr_width) // 2)
+        qr_start_y = url_y + 1
         
-        # Split into lines and clean up - remove trailing whitespace for better alignment
-        qr_lines = qr_ascii.strip().split('\n')
+        for i, line in enumerate(qr_lines):
+          if qr_start_y + i < term_height - 8:  # Leave room for GPU bar
+            for j, char in enumerate(line):
+              if 0 <= qr_start_x + j < viz_width:
+                visualization[qr_start_y + i][qr_start_x + j] = char
         
-        # Fix the first line alignment issue - qrcode library sometimes omits leading space
-        if qr_lines and not qr_lines[0].startswith(' '):
-          qr_lines[0] = ' ' + qr_lines[0]
+        url_y = qr_start_y + len(qr_lines) + 1
+    elif compact_mode:
+      # Compact: URLs at top, QR below
+      url_start_x = 2  # Smaller margin
+      url_y = info_start_y
+      
+      if web_url:
+        # Shorten URL for compact mode
+        compact_label = "Web:"
+        for j, char in enumerate(compact_label):
+          if url_start_x + j < viz_width:
+            visualization[url_y][url_start_x + j] = char
         
-        # Now clean up trailing whitespace
-        qr_lines = [line.rstrip() for line in qr_lines]
+        # Put URL on same line if space permits
+        url_text = web_url
+        if len(compact_label) + len(url_text) + 1 > viz_width - 4:
+          # URL on next line if too long
+          url_y += 1
+          url_x = url_start_x
+        else:
+          url_x = url_start_x + len(compact_label) + 1
         
-        # Add QR code lines with label and spacing
-        info_lines.append("")  # Space before QR label
-        info_lines.append("📱 Scan QR code to join from mobile:")
-        info_lines.append("")  # Space before QR code
-        info_lines.extend(qr_lines)
-        info_lines.append("")  # Space after QR code
+        for j, char in enumerate(url_text):
+          if url_x + j < viz_width:
+            visualization[url_y][url_x + j] = char
+        url_y += 2
+      
+      # Add QR code below URLs in compact mode
+      if qr_lines and show_qr:
+        # Center the QR code
+        qr_start_x = max(0, (viz_width - qr_width) // 2)
+        qr_start_y = url_y + 1
         
-      except ImportError:
-        # Fallback if qrcode not available
-        info_lines.append("")
-        info_lines.append("📱 Mobile: Open web browser and navigate to above URL")
-      except Exception as e:
-        info_lines.append("")
-        info_lines.append(f"📱 Mobile access available at: {web_url}")
+        for i, line in enumerate(qr_lines):
+          if qr_start_y + i < term_height - 6:  # Leave room for GPU bar
+            for j, char in enumerate(line):
+              if 0 <= qr_start_x + j < viz_width:
+                visualization[qr_start_y + i][qr_start_x + j] = char
+        
+        url_y = qr_start_y + len(qr_lines) + 1
+    else:
+      # Full mode: QR code on right, URLs on left
+      qr_start_x = viz_width - qr_width - 5  # 5 chars margin from right
+      qr_start_y = info_start_y
+      
+      if qr_lines:
+        # Add QR label
+        qr_label = "📱 Scan to join:"
+        label_x = qr_start_x + (qr_width - len(qr_label)) // 2
+        if label_x >= 0 and qr_start_y < term_height:
+          for j, char in enumerate(qr_label):
+            if label_x + j < viz_width:
+              visualization[qr_start_y][label_x + j] = char
+        
+        # Add QR code
+        for i, line in enumerate(qr_lines):
+          if qr_start_y + i + 2 < term_height:  # +2 for label and spacing
+            for j, char in enumerate(line):
+              if qr_start_x + j < viz_width:
+                visualization[qr_start_y + i + 2][qr_start_x + j] = char
+      
+      # Place URLs on the left side
+      url_start_x = 5  # Left margin
+      url_y = info_start_y
+      max_url_x = qr_start_x - 2 if qr_lines else viz_width - 2
+      
+      if web_url:
+        url_label = "Web Chat URL:"
+        for j, char in enumerate(url_label):
+          if url_start_x + j < max_url_x:
+            visualization[url_y][url_start_x + j] = char
+        url_y += 1
+        
+        for j, char in enumerate(web_url):
+          if url_start_x + j < max_url_x:
+            visualization[url_y][url_start_x + j] = char
+        url_y += 2
+      
+      if api_url and not compact_mode:  # Skip API URL in compact mode
+        api_label = "Chat API endpoint:"
+        for j, char in enumerate(api_label):
+          if url_start_x + j < max_url_x:
+            visualization[url_y][url_start_x + j] = char
+        url_y += 1
+        
+        for j, char in enumerate(api_url):
+          if url_start_x + j < max_url_x:
+            visualization[url_y][url_start_x + j] = char
+        url_y += 2
 
-    info_start_y = len(exo_lines) + 1
-    for i, line in enumerate(info_lines):
-      start_x = (viz_width - len(line)) // 2
-      for j, char in enumerate(line):
-        if 0 <= start_x + j < viz_width and info_start_y + i < term_height:
-          visualization[info_start_y + i][start_x + j] = char
-
+    # Calculate where the GPU bar should go
+    if mobile_mode or compact_mode:
+      # Put GPU bar at bottom in mobile/compact mode
+      bar_y = term_height - 4  # Closer to bottom for compact view
+    else:
+      # In full mode, account for QR code if present
+      if qr_lines and 'qr_start_y' in locals():
+        bar_y = max(url_y + 1, qr_start_y + len(qr_lines) + 4)
+      else:
+        bar_y = url_y + 1
+    
+    # Ensure bar_y is within bounds
+    if bar_y >= term_height - 4:
+      bar_y = term_height - 5  # Leave room for labels
+    
     # Calculate total FLOPS and position on the bar
     total_flops = sum(self.topology.nodes.get(partition.node_id, UNKNOWN_DEVICE_CAPABILITIES).flops.fp16 for partition in self.partitions)
     bar_pos = (math.tanh(total_flops**(1/3)/2.5 - 2) + 1)
 
-    # Add GPU poor/rich bar (adaptive width)
-    bar_width = min(30, viz_width // 3)
+    # Add GPU poor/rich bar - adjust size for mobile
+    if mobile_mode or compact_mode:
+      # Compact bar for small screens
+      bar_width = min(16, viz_width // 3)  # Smaller bar
+    else:
+      bar_width = min(30, viz_width // 3)
+    
     bar_start_x = (viz_width - bar_width) // 2
-    bar_y = info_start_y + len(info_lines) + 1
 
     # Create a gradient bar using emojis
-    gradient_bar = Text()
+    gradient_bar = ""
     emojis = ["🟥", "🟧", "🟨", "🟩"]
     for i in range(bar_width):
       emoji_index = min(int(i/(bar_width/len(emojis))), len(emojis) - 1)
-      gradient_bar.append(emojis[emoji_index])
+      gradient_bar += emojis[emoji_index]
 
-    # Add the gradient bar to the visualization
-    if bar_start_x - 1 >= 0:
-      visualization[bar_y][bar_start_x - 1] = "["
-    if bar_start_x + bar_width < viz_width:
-      visualization[bar_y][bar_start_x + bar_width] = "]"
-    for i, segment in enumerate(str(gradient_bar)):
-      if bar_start_x + i < viz_width:
-        visualization[bar_y][bar_start_x + i] = segment
-
-    # Add labels (adjust for narrow terminals)
-    poor_label = "GPU poor"
-    rich_label = "GPU rich"
-    if viz_width < 80:
+    # Add the gradient bar to the visualization with brackets
+    # Center the entire bar including brackets
+    bar_full_width = len(gradient_bar) + 2  # +2 for brackets
+    
+    # For mobile/compact, use compact labels
+    if mobile_mode or compact_mode:
       poor_label = "Poor"
       rich_label = "Rich"
+    else:
+      poor_label = "Poor"
+      rich_label = "Rich"
+    bar_start_x = (viz_width - bar_full_width) // 2
     
-    # Place labels safely
-    poor_start = max(0, bar_start_x - len(poor_label) - 2)
-    rich_start = min(bar_start_x + bar_width + 2, viz_width - len(rich_label))
+    # Add brackets
+    if bar_start_x >= 0:
+      visualization[bar_y][bar_start_x] = "["
+    if bar_start_x + bar_full_width - 1 < viz_width:
+      visualization[bar_y][bar_start_x + bar_full_width - 1] = "]"
     
-    for i, char in enumerate(poor_label):
-      if poor_start + i < viz_width:
-        visualization[bar_y - 1][poor_start + i] = char
-    for i, char in enumerate(rich_label):
-      if rich_start + i < viz_width:
-        visualization[bar_y - 1][rich_start + i] = char
+    # Add the gradient bar (emojis)
+    for i, char in enumerate(gradient_bar):
+      if bar_start_x + 1 + i < viz_width:
+        visualization[bar_y][bar_start_x + 1 + i] = char
+
+    # Add labels (adjust for narrow terminals)
+    if mobile_mode or compact_mode:
+      # Compact layout: labels at edges of screen
+      poor_label = "Poor"
+      rich_label = "Rich"
+      
+      # Place labels at the very edges for compact view
+      poor_start = 1  # Left edge
+      rich_start = viz_width - len(rich_label) - 1  # Right edge
+      
+      # Add labels on same line as bar
+      for i, char in enumerate(poor_label):
+        if poor_start + i < bar_start_x - 1:  # Don't overlap with bar
+          visualization[bar_y][poor_start + i] = char
+      for i, char in enumerate(rich_label):
+        if rich_start > bar_start_x + bar_full_width and rich_start + i < viz_width:
+          visualization[bar_y][rich_start + i] = char
+    else:
+      # Full layout: labels adjacent to bar
+      poor_label = "GPU poor"
+      rich_label = "GPU rich"
+      
+      # Position labels next to the bar
+      poor_start = max(0, bar_start_x - len(poor_label) - 2)
+      rich_start = min(bar_start_x + bar_full_width + 2, viz_width - len(rich_label))
+      
+      for i, char in enumerate(poor_label):
+        if poor_start + i < viz_width:
+          visualization[bar_y][poor_start + i] = char
+      for i, char in enumerate(rich_label):
+        if rich_start + i < viz_width:
+          visualization[bar_y][rich_start + i] = char
 
     # Add position indicator and FLOPS value
-    pos_x = bar_start_x + int(bar_pos*bar_width)
-    flops_str = f"{total_flops:.2f} TFLOPS"
-    if viz_width < 80:
-      flops_str = f"{total_flops:.1f}TF"  # Shorter format for narrow terminals
-    
-    # Place indicator and text safely
-    if 0 <= pos_x < viz_width:
-      visualization[bar_y - 1][pos_x] = "▼"
-      visualization[bar_y + 2][pos_x] = "▲"
-    
-    # Center FLOPS text
-    flops_start = max(0, pos_x - len(flops_str) // 2)
-    flops_end = min(viz_width, flops_start + len(flops_str))
-    for i, char in enumerate(flops_str):
-      if flops_start + i < flops_end:
-        visualization[bar_y + 1][flops_start + i] = char
+    # Position is relative to the actual emoji bar (inside brackets)
+    if not mobile_mode:  # Skip arrow indicators on very small screens
+      pos_x = bar_start_x + 1 + int(bar_pos * len(gradient_bar))
+      flops_str = f"{total_flops:.2f} TFLOPS"
+      if viz_width < 80:
+        flops_str = f"{total_flops:.1f}TF"  # Shorter format for narrow terminals
+      
+      # Place indicator and text safely
+      if 0 <= pos_x < viz_width:
+        visualization[bar_y - 1][pos_x] = "▼"
+        visualization[bar_y + 2][pos_x] = "▲"
+      
+      # Center FLOPS text
+      flops_start = max(0, pos_x - len(flops_str) // 2)
+      flops_end = min(viz_width, flops_start + len(flops_str))
+      for i, char in enumerate(flops_str):
+        if flops_start + i < flops_end:
+          visualization[bar_y + 1][flops_start + i] = char
+    else:
+      # Mobile mode: just show FLOPS value below bar
+      flops_str = f"{total_flops:.1f}TF"
+      flops_start = (viz_width - len(flops_str)) // 2
+      for i, char in enumerate(flops_str):
+        if flops_start + i < viz_width and bar_y + 1 < term_height:
+          visualization[bar_y + 1][flops_start + i] = char
 
     # Add an extra empty line for spacing
     bar_y += 4
+    
+    # Define the network visualization area
+    # In mobile/compact mode, QR is below so use full width
+    # In full mode, avoid QR on right if present
+    if mobile_mode or compact_mode or not qr_lines:
+      network_max_x = viz_width - 5
+    else:
+      # QR is on the right in full mode
+      network_max_x = qr_start_x - 5 if 'qr_start_x' in locals() else viz_width - 5
+    
+    # Adjust center and radius for network visualization to fit in available space
+    network_center_x = network_max_x // 2
+    network_center_y = bar_y + 8  # Below the GPU bar
+    network_radius_x = min(radius_x, (network_max_x - 10) // 2)
+    network_radius_y = min(radius_y, 8)
 
     for i, partition in enumerate(self.partitions):
       device_capabilities = self.topology.nodes.get(partition.node_id, UNKNOWN_DEVICE_CAPABILITIES)
 
       angle = 2*math.pi*i/num_partitions
-      x = int(center_x + radius_x*math.cos(angle))
-      y = int(center_y + radius_y*math.sin(angle))
+      x = int(network_center_x + network_radius_x*math.cos(angle))
+      y = int(network_center_y + network_radius_y*math.sin(angle))
 
       # Place node with different color for active node and this node
-      if partition.node_id == self.topology.active_node_id:
-        visualization[y][x] = "🔴"
-      elif partition.node_id == self.node_id:
-        visualization[y][x] = "🟢"
-      else:
-        visualization[y][x] = "🔵"
+      # Check bounds before placing node
+      if 0 <= y < term_height and 0 <= x < viz_width:
+        if partition.node_id == self.topology.active_node_id:
+          visualization[y][x] = "🔴"
+        elif partition.node_id == self.node_id:
+          visualization[y][x] = "🟢"
+        else:
+          visualization[y][x] = "🔵"
 
       # Place node info (model, memory, TFLOPS, partition) on three lines
       # Adjust format based on terminal width
@@ -403,23 +669,25 @@ class TopologyViz:
         ]
 
       # Calculate info position based on angle
-      info_distance_x = radius_x + 6
-      info_distance_y = radius_y + 3
-      info_x = int(center_x + info_distance_x*math.cos(angle))
-      info_y = int(center_y + info_distance_y*math.sin(angle))
+      info_distance_x = network_radius_x + 6
+      info_distance_y = network_radius_y + 3
+      info_x = int(network_center_x + info_distance_x*math.cos(angle))
+      info_y = int(network_center_y + info_distance_y*math.sin(angle))
 
       # Adjust text position to avoid overwriting the node icon and prevent cutoff
       max_info_len = len(max(node_info, key=len))
+      # Ensure we don't overlap with QR code area
+      max_allowed_x = network_max_x - max_info_len - 1
       if info_x < x:
         info_x = max(0, x - max_info_len - 1)
       elif info_x > x:
-        info_x = min(viz_width - max_info_len - 1, info_x)
+        info_x = min(max_allowed_x, info_x)
 
       # Adjust for top and bottom nodes
       if 5*math.pi/4 < angle < 7*math.pi/4:
-        info_x = min(info_x + 4, viz_width - max_info_len - 1)
+        info_x = min(info_x + 4, max_allowed_x)
       elif math.pi/4 < angle < 3*math.pi/4:
-        info_x = min(info_x + 3, viz_width - max_info_len - 1)
+        info_x = min(info_x + 3, max_allowed_x)
         info_y -= 2
 
       for j, line in enumerate(node_info):
@@ -431,8 +699,8 @@ class TopologyViz:
       # Draw line to next node and add connection description
       next_i = (i+1) % num_partitions
       next_angle = 2*math.pi*next_i/num_partitions
-      next_x = int(center_x + radius_x*math.cos(next_angle))
-      next_y = int(center_y + radius_y*math.sin(next_angle))
+      next_x = int(network_center_x + network_radius_x*math.cos(next_angle))
+      next_y = int(network_center_y + network_radius_y*math.sin(next_angle))
 
       # Get connection descriptions
       conn1 = self.topology.peer_graph.get(partition.node_id, set())
@@ -446,7 +714,8 @@ class TopologyViz:
       for step in range(1, steps):
         line_x = int(x + (next_x-x)*step/steps)
         line_y = int(y + (next_y-y)*step/steps)
-        if 0 <= line_y < term_height and 0 <= line_x < viz_width:
+        # Don't draw lines in the QR code area
+        if 0 <= line_y < term_height and 0 <= line_x < network_max_x:
           visualization[line_y][line_x] = "-"
 
       # Add connection description near the midpoint of the line
@@ -454,12 +723,26 @@ class TopologyViz:
       mid_y = (y + next_y) // 2
       # Center the description text around the midpoint
       desc_start_x = mid_x - len(connection_description) // 2
+      # Ensure description doesn't go into QR area
+      desc_end_x = min(desc_start_x + len(connection_description), network_max_x)
       for j, char in enumerate(connection_description):
-        if 0 <= mid_y < term_height and 0 <= desc_start_x + j < viz_width:
+        if 0 <= mid_y < term_height and desc_start_x + j < desc_end_x:
           visualization[mid_y][desc_start_x + j] = char
 
     # Convert to string
     return "\n".join("".join(str(char) for char in row) for row in visualization)
+  
+  def _get_version_string(self) -> str:
+    """Get the version string for display."""
+    try:
+      import importlib.metadata
+      try:
+        hanzo_net_version = importlib.metadata.version('hanzo-net')
+      except:
+        hanzo_net_version = "dev"
+      return hanzo_net_version
+    except:
+      return "dev"
 
   def _generate_download_layout(self) -> Table:
     summary = Table(show_header=False, box=None, padding=(0, 1), expand=True)

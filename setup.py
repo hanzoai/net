@@ -90,7 +90,7 @@ _add_gpu_requires()
 
 setup(
   name="hanzo-net",
-  version="0.1.12",
+  version="0.1.20",
   description="Hanzo Network - Distributed AI compute network for running models locally and remotely",
   author="Hanzo AI",
   author_email="dev@hanzo.ai",
@@ -99,7 +99,7 @@ setup(
   package_dir={"": "src"},
   install_requires=install_requires,
   extras_require=extras_require,
-  package_data={"net": ["tinychat/**/*"]},
+  package_data={"net": ["netchat/**/*"]},
   entry_points={"console_scripts": ["hanzo-net = net.main:run"]},
   classifiers=[
     "Development Status :: 3 - Alpha",
