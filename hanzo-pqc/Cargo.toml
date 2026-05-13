@@ -1,10 +1,15 @@
 [package]
-name = "hanzo-pqc"
-description = "Hanzo AI - Pqc Library"
+name = "hanzonet-pqc"
+description = "Hanzo Network — post-quantum cryptography (ML-KEM, ML-DSA, SLH-DSA, hybrid, privacy tiers, attestation)"
 license = "MIT"
-version = "1.1.12"
+version = "1.1.21"
 edition = { workspace = true }
+repository = "https://github.com/hanzonet/network"
 authors = { workspace = true }
+
+[lib]
+name = "hanzo_pqc"
+path = "src/lib.rs"
 
 [features]
 default = ["ml-kem", "ml-dsa", "hybrid"]

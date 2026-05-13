@@ -1,10 +1,10 @@
 [package]
 name = "hanzo-db-sqlite"
-version = "1.1.12"
+version = "1.1.13"
 edition = "2021"
 authors = ["Hanzo AI Inc"]
 license = "MIT"
-repository = "https://github.com/hanzoai/hanzo-node"
+repository = "https://github.com/hanzonet/network"
 homepage = "https://hanzo.ai"
 description = "Sqlite for Hanzo AI platform"
 
@@ -18,9 +18,9 @@ tokio = { version = "1.36", features = ['rt', 'rt-multi-thread', 'macros', 'fs',
 r2d2 = "0.8"
 r2d2_sqlite = "0.25"
 keyphrases = "0.3.3"
-hanzo-tools = { version = "1.1.11", path = "../hanzo-tools" }
-hanzo-messages = { version = "1.1.12", path = "../hanzo-messages" }
-hanzo-embed = { version = "1.1.12", path = "../hanzo-embed" }
+hanzo-tools = { version = "1.1.21", path = "../hanzo-tools" }
+hanzo-messages = { version = "1.1.13", path = "../hanzo-messages" }
+hanzo-embed = { version = "1.1.13", path = "../hanzo-embed" }
 reqwest = { version = "0.11.27", features = ['json'] }
 bincode = "1.3.3"
 zerocopy = "0.8.9"

@@ -1,10 +1,15 @@
 [package]
-name = "hanzo-config"
-description = "Hanzo AI - Config Library"
+name = "hanzonet-config"
+description = "Hanzo Network — node configuration library"
 license = "MIT"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
+repository = "https://github.com/hanzonet/network"
+
+[lib]
+name = "hanzo_config"
+path = "src/lib.rs"
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }

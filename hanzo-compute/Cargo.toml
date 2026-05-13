@@ -5,6 +5,7 @@ license = "MIT"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
+repository = "https://github.com/hanzonet/network"
 keywords = ["ai", "distributed", "bittorrent", "swarm", "p2p"]
 categories = ["network-programming", "asynchronous"]
 

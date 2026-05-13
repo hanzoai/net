@@ -1,10 +1,15 @@
 [package]
-name = "hanzo-did"
-description = "Hanzo AI - Did Library"
+name = "hanzonet-did"
+description = "Hanzo Network — W3C DID (Decentralized Identifier) library for the network node"
 license = "MIT"
-version = "1.1.11"
+version = "1.1.21"
 edition = { workspace = true }
+repository = "https://github.com/hanzonet/network"
 authors = { workspace = true }
+
+[lib]
+name = "hanzo_did"
+path = "src/lib.rs"
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }

@@ -5,7 +5,7 @@ edition.workspace = true
 authors.workspace = true
 description = "Hanzo AI - Universal .ai file format for AI artifacts"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/hanzoai/hanzo"
+repository = "https://github.com/hanzonet/network"
 keywords = ["ai", "machine-learning", "models", "artifacts", "format"]
 
 [dependencies]

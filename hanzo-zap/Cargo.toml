@@ -1,9 +1,10 @@
 [package]
 name = "hanzo-zap"
-version = "0.1.0"
+version = "0.6.75"
 edition = "2021"
 description = "ZAP (Zero-copy Agent Protocol) wire protocol for Hanzo products"
 license = "MIT"
+repository = "https://github.com/hanzonet/network"
 
 [dependencies]
 tokio = { version = "1", features = ["io-util", "net", "rt", "sync", "macros"] }

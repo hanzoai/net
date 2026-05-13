@@ -2,8 +2,9 @@
 name = "hanzo-brain"
 version = "0.1.0"
 edition = "2021"
-description = "Hanzo Brain — pure-CPU algorithm primitives consumed by the Hanzo Node. Cross-runtime byte-equivalent with @hanzo/bot-memory (TS), hanzo-memory (Python), bot-go (Go), and bot-cpp (C++). See hanzoai/brain for the canonical contract."
+description = "Hanzo Brain — pure-CPU algorithm primitives consumed by the Hanzo Node. Cross-runtime byte-equivalent with @hanzo/bot-memory (TS), hanzo-memory (Python), bot-go (Go), and bot-cpp (C++)."
 license = "MIT"
+repository = "https://github.com/hanzonet/network"
 
 [dependencies]
 blake3 = { workspace = true }

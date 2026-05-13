@@ -1,8 +1,9 @@
 [package]
 name = "hanzo-wasm"
-version = "0.1.1"
+version = "0.1.2"
 description = "WASM runtime for Hanzo AI platform"
 license = "MIT"
+repository = "https://github.com/hanzonet/network"
 edition = "2021"
 
 [dependencies]
@@ -14,7 +15,7 @@ tokio = { version = "1.38", features = ["full"] }
 anyhow = "1.0"
 tracing = "0.1"
 base64 = "0.22"
-hanzo-tools = { version = "1.1.11", path = "../hanzo-tools" }
+hanzo-tools = { version = "1.1.21", path = "../hanzo-tools" }
 rand = "0.8"
 uuid = { version = "1.6", features = ["v4"] }
 md5 = "0.7"
@@ -23,4 +24,4 @@ md5 = "0.7"
 wat = "1.217"
 tempfile = "3.10"
 tracing-subscriber = "0.3"
-hanzo-wasm-runtime = {path = "../hanzo-wasm-runtime", version = "1.1.19"}
+hanzo-wasm-runtime = {path = "../hanzo-wasm-runtime", version = "1.1.21"}

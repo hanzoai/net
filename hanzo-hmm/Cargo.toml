@@ -2,9 +2,10 @@
 name = "hanzo-hmm"
 description = "Hidden Markov Model + Hamiltonian MarketMaker for heterogeneous compute pricing"
 license = "MIT"
-version = "0.1.1"
+version = "0.1.2"
 edition = { workspace = true }
 authors = { workspace = true }
+repository = "https://github.com/hanzonet/network"
 
 [dependencies]
 serde = { workspace = true, features = ["derive"] }

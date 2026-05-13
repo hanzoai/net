@@ -1,10 +1,15 @@
 [package]
-name = "hanzo-mcp"
-version = "1.1.11"
+name = "hanzonet-mcp"
+version = "1.1.21"
 edition = { workspace = true }
-description = "Methods to interact with MCP servers"
+description = "Hanzo Network — node-internal Model Context Protocol client/server adapter"
 license = "MIT"
+repository = "https://github.com/hanzonet/network"
 authors = { workspace = true }
+
+[lib]
+name = "hanzo_mcp"
+path = "src/lib.rs"
 
 [dependencies]
 thiserror = { workspace = true }

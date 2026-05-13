@@ -1,11 +1,11 @@
 [package]
 name = "hanzo-database"
-version = "1.1.12"
+version = "1.1.13"
 edition = "2021"
 authors = ["Hanzo AI Inc"]
 description = "Multi-backend database abstraction for Hanzo Node - Supports LanceDB, DuckDB, PostgreSQL, and more"
 license = "Apache-2.0"
-repository = "https://github.com/hanzoai/hanzo-node"
+repository = "https://github.com/hanzonet/network"
 homepage = "https://hanzo.ai"
 keywords = ["database", "vector", "multimodal", "lancedb", "duckdb"]
 categories = ["database", "science"]
@@ -55,8 +55,8 @@ sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-rustls", "sqlit
 redis = { version = "0.25", features = ["aio", "tokio-comp"], optional = true }
 
 # Hanzo dependencies
-hanzo-messages = { version = "1.1.12", path = "../hanzo-messages" }
-hanzo-embed = { version = "1.1.12", path = "../hanzo-embed" }
+hanzo-messages = { version = "1.1.13", path = "../hanzo-messages" }
+hanzo-embed = { version = "1.1.13", path = "../hanzo-embed" }
 
 [dev-dependencies]
 tokio-test = "0.4"

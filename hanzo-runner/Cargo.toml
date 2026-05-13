@@ -1,10 +1,11 @@
 [package]
 name = "hanzo-runner"
-version = "1.1.12"
+version = "1.1.13"
 edition = "2021"
 build = "build.rs"
 description = "Rust library to execute hanzo-tools in a safe and performant environment"
 license = "MIT"
+repository = "https://github.com/hanzonet/network"
 homepage = "https://hanzo.ai"
 readme = "README.md"
 keywords = ["hanzo", "tools", "runner", "safe", "ai"]

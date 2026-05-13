@@ -5,13 +5,13 @@ license = "MIT"
 version = { workspace = true }
 edition = { workspace = true }
 authors = { workspace = true }
-repository = "https://github.com/hanzoai/node"
+repository = "https://github.com/hanzonet/network"
 homepage = "https://hanzo.ai"
 
 [dependencies]
-hanzo-messages = { version = "1.1.12", path = "../hanzo-messages" }
-hanzo-db-sqlite = { version = "1.1.12", path = "../hanzo-db-sqlite" }
-hanzo-embed = { version = "1.1.12", path = "../hanzo-embed" }
+hanzo-messages = { version = "1.1.13", path = "../hanzo-messages" }
+hanzo-db-sqlite = { version = "1.1.13", path = "../hanzo-db-sqlite" }
+hanzo-embed = { version = "1.1.13", path = "../hanzo-embed" }
 tokio = { workspace = true }
 chrono = { workspace = true, features = ["serde"] }
 serde_json = { workspace = true }

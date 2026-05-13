@@ -5,7 +5,7 @@ license = "MIT"
 version = { workspace = true }
 edition = { workspace = true }
 authors = { workspace = true }
-repository = "https://github.com/hanzoai/node"
+repository = "https://github.com/hanzonet/network"
 homepage = "https://hanzo.ai"
 
 [dependencies]
@@ -17,7 +17,7 @@ tokio = { version = "1.38", features = ["full"] }
 anyhow = "1.0"
 tracing = "0.1"
 base64 = "0.22"
-hanzo-tools = { version = "1.1.16", path = "../hanzo-tools" }
+hanzo-tools = { version = "1.1.21", path = "../hanzo-tools" }
 rand = "0.8"
 uuid = { version = "1.6", features = ["v4"] }
 md5 = "0.7"

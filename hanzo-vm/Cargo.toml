@@ -5,6 +5,10 @@ license = "MIT"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
+repository = "https://github.com/hanzonet/network"
+# Cannot publish to crates.io until hanzo-engine and luxprecompile-sys are published.
+# Also depends on the local net hanzo-pqc (publish = false).
+publish = false
 
 [features]
 default = []

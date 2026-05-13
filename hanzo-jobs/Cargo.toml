@@ -1,18 +1,18 @@
 [package]
 name = "hanzo-jobs"
-version = "1.1.12"
+version = "1.1.13"
 edition = "2021"
 authors = ["Hanzo AI Inc"]
 license = "MIT"
-repository = "https://github.com/hanzoai/hanzo-node"
+repository = "https://github.com/hanzonet/network"
 homepage = "https://hanzo.ai"
 description = "Job Queue Manager for Hanzo AI platform"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
-hanzo-messages = { version = "1.1.12", path = "../hanzo-messages" }
-hanzo-db-sqlite = { version = "1.1.12", path = "../hanzo-db-sqlite" }
-hanzo-embed = { version = "1.1.12", path = "../hanzo-embed" }
+hanzo-messages = { version = "1.1.13", path = "../hanzo-messages" }
+hanzo-db-sqlite = { version = "1.1.13", path = "../hanzo-db-sqlite" }
+hanzo-embed = { version = "1.1.13", path = "../hanzo-embed" }
 tokio = { version = "1.36", features = ['rt', 'rt-multi-thread', 'macros', 'fs', 'io-util', 'net', 'sync', 'time'] }
 chrono = { version = "0.4", features = ['serde'] }
 serde_json = "1.0.117"

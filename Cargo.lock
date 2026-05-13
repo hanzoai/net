@@ -5809,7 +5809,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-ai-format"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "async-trait",
  "base64 0.22.1",
@@ -5835,7 +5835,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-api"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "anyhow",
  "async-channel 2.5.0",
@@ -5879,7 +5879,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-compute"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "async-trait",
  "blake3",
@@ -5897,28 +5897,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "hanzo-config"
-version = "1.1.20"
-dependencies = [
- "dirs 5.0.1",
- "num_cpus",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "toml 0.8.22",
- "walkdir",
-]
-
-[[package]]
 name = "hanzo-consensus"
-version = "1.1.19"
+version = "1.1.20"
 dependencies = [
  "anyhow",
  "async-trait",
  "blake3",
  "chrono",
- "hanzo-pqc",
+ "hanzonet-pqc",
  "log",
  "lux-consensus",
  "serde",
@@ -5931,7 +5917,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-database"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "anyhow",
  "arrow-array 55.2.0",
@@ -5969,7 +5955,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-db-sqlite"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "bincode",
  "blake3",
@@ -6000,35 +5986,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "hanzo-did"
-version = "1.1.11"
-dependencies = [
- "anyhow",
- "async-trait",
- "base64 0.22.1",
- "blake3",
- "chrono",
- "ed25519-dalek",
- "ethers-core",
- "hex",
- "ipfs-api-backend-hyper",
- "multibase",
- "multihash 0.19.3",
- "regex",
- "reqwest 0.11.27",
- "serde",
- "serde_json",
- "sha2",
- "thiserror 2.0.18",
- "tokio",
- "tokio-test",
- "url",
- "x25519-dalek",
-]
-
-[[package]]
 name = "hanzo-embed"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "async-trait",
  "bincode",
@@ -6061,7 +6020,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-fs"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "async-trait",
  "bincode",
@@ -6094,7 +6053,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-hmm"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -6124,7 +6083,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-http-api"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "anyhow",
  "async-channel 1.9.0",
@@ -6160,7 +6119,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-identity"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "chrono",
  "dashmap 6.1.0",
@@ -6177,7 +6136,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-job-queue-manager"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "chrono",
  "hanzo-db-sqlite",
@@ -6191,7 +6150,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-jobs"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "chrono",
  "hanzo-db-sqlite",
@@ -6205,13 +6164,13 @@ dependencies = [
 
 [[package]]
 name = "hanzo-l2"
-version = "1.1.19"
+version = "1.1.20"
 dependencies = [
  "anyhow",
  "async-trait",
  "blake3",
  "chrono",
- "hanzo-pqc",
+ "hanzonet-pqc",
  "hex",
  "log",
  "lux-consensus",
@@ -6226,7 +6185,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-libp2p"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "chrono",
  "clap 4.5.60",
@@ -6254,7 +6213,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-libp2p-relayer"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "chrono",
  "clap 3.2.25",
@@ -6279,7 +6238,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-machine"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "bindgen 0.69.5",
  "libc",
@@ -6291,29 +6250,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "hanzo-mcp"
-version = "1.1.11"
-dependencies = [
- "async-trait",
- "futures",
- "home",
- "log",
- "mockall",
- "once_cell",
- "regex",
- "rmcp",
- "serde",
- "serde_json",
- "strip-ansi-escapes",
- "thiserror 2.0.18",
- "tokio",
- "tokio-test",
- "tracing",
-]
-
-[[package]]
 name = "hanzo-messages"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "aes-gcm",
  "async-trait",
@@ -6354,7 +6292,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-mining"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "blake3",
  "chacha20poly1305 0.10.1",
@@ -6399,7 +6337,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-model-discovery"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "async-trait",
  "chrono",
@@ -6414,7 +6352,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-models"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "async-trait",
  "chrono",
@@ -6444,36 +6382,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "hanzo-pqc"
-version = "1.1.12"
-dependencies = [
- "anyhow",
- "async-trait",
- "base64 0.22.1",
- "bincode",
- "blake3",
- "criterion",
- "ed25519-dalek",
- "getrandom 0.2.16",
- "hex",
- "hkdf",
- "oqs",
- "proptest",
- "rand 0.8.5",
- "serde",
- "serde_json",
- "sha2",
- "sha3",
- "thiserror 2.0.18",
- "tokio",
- "tokio-test",
- "x25519-dalek",
- "zeroize",
-]
-
-[[package]]
 name = "hanzo-runner"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "anyhow",
  "async-std",
@@ -6509,7 +6419,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-runtime"
-version = "1.1.12"
+version = "1.1.13"
 dependencies = [
  "hanzo-messages",
  "hanzo-runner",
@@ -6522,7 +6432,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-runtime-tests"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -6546,12 +6456,12 @@ dependencies = [
 
 [[package]]
 name = "hanzo-tools"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "base64 0.22.1",
- "hanzo-mcp",
  "hanzo-messages",
  "hanzo-tools-runner",
+ "hanzonet-mcp",
  "log",
  "once_cell",
  "regex",
@@ -6564,7 +6474,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-tools-runner"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "anyhow",
  "async-std",
@@ -6608,13 +6518,13 @@ dependencies = [
 
 [[package]]
 name = "hanzo-vm"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "anyhow",
  "async-trait",
  "blake3",
  "hanzo-engine",
- "hanzo-pqc",
+ "hanzonet-pqc",
  "hex",
  "log",
  "luxprecompile-sys",
@@ -6630,7 +6540,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-wasm"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -6652,7 +6562,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-wasm-runtime"
-version = "1.1.20"
+version = "1.1.21"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -6673,7 +6583,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-zap"
-version = "0.1.0"
+version = "0.6.75"
 dependencies = [
  "rustls 0.23.27",
  "serde",
@@ -6682,6 +6592,96 @@ dependencies = [
  "tokio-rustls 0.26.2",
  "tracing",
  "webpki-roots 0.26.11",
+]
+
+[[package]]
+name = "hanzonet-config"
+version = "1.1.21"
+dependencies = [
+ "dirs 5.0.1",
+ "num_cpus",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "toml 0.8.22",
+ "walkdir",
+]
+
+[[package]]
+name = "hanzonet-did"
+version = "1.1.21"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "base64 0.22.1",
+ "blake3",
+ "chrono",
+ "ed25519-dalek",
+ "ethers-core",
+ "hex",
+ "ipfs-api-backend-hyper",
+ "multibase",
+ "multihash 0.19.3",
+ "regex",
+ "reqwest 0.11.27",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-test",
+ "url",
+ "x25519-dalek",
+]
+
+[[package]]
+name = "hanzonet-mcp"
+version = "1.1.21"
+dependencies = [
+ "async-trait",
+ "futures",
+ "home",
+ "log",
+ "mockall",
+ "once_cell",
+ "regex",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "strip-ansi-escapes",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-test",
+ "tracing",
+]
+
+[[package]]
+name = "hanzonet-pqc"
+version = "1.1.21"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "base64 0.22.1",
+ "bincode",
+ "blake3",
+ "criterion",
+ "ed25519-dalek",
+ "getrandom 0.2.16",
+ "hex",
+ "hkdf",
+ "oqs",
+ "proptest",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
+ "sha2",
+ "sha3",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-test",
+ "x25519-dalek",
+ "zeroize",
 ]
 
 [[package]]
