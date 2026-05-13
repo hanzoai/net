@@ -40,6 +40,11 @@ members = [
   "hanzo-wasm",
   "hanzo-wasm-runtime",
   "hanzo-zap",
+  "hanzo-agentic",
+  # "hanzo-sovereign", # Excluded: ml-dsa 0.6 doesn't exist on crates.io (only prerelease 0.1.0-rc.x)
+]
+exclude = [
+  "hanzo-sovereign",
 ]
 resolver = "2"
 

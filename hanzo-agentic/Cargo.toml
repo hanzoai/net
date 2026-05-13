@@ -6,6 +6,10 @@ description = "Hanzo Network — agentic network integration with post-quantum p
 license = "MIT"
 repository = "https://github.com/hanzonet/network"
 
+[lib]
+name = "hanzo_agentic"
+path = "src/network.rs"
+
 [dependencies]
 tokio = { version = "1.0", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
