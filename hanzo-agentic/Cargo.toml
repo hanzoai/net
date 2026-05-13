@@ -1,8 +1,10 @@
 [package]
 name = "hanzo-agentic"
-version = "1.1.19"
+version = "1.1.21"
 edition = "2021"
-description = "Agentic network integration for hanzo-node with PQ privacy"
+description = "Hanzo Network — agentic network integration with post-quantum privacy"
+license = "MIT"
+repository = "https://github.com/hanzonet/network"
 
 [dependencies]
 tokio = { version = "1.0", features = ["full"] }

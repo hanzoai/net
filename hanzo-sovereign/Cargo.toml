@@ -1,8 +1,10 @@
 [package]
 name = "hanzo-sovereign"
-version = "1.1.19"
+version = "1.1.21"
 edition = "2021"
-description = "Hanzo L1 sovereign blockchain with ML-KEM/ML-DSA"
+description = "Hanzo Network — L1 sovereign blockchain with ML-KEM / ML-DSA primitives"
+license = "MIT"
+repository = "https://github.com/hanzonet/network"
 
 [dependencies]
 tokio = { version = "1.0", features = ["full"] }
