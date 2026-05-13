@@ -1,14 +1,11 @@
 [package]
 name = "hanzo-vm"
-description = "Lux VM interface for Hanzo L2 - wraps EVM execution"
+description = "Hanzo Network — EVM with precompiles for PQ verify, Quasar, AI inference, AI embedding (0x0101/0x0102/0x0201/0x0202)"
 license = "MIT"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 repository = "https://github.com/hanzonet/network"
-# Cannot publish to crates.io until hanzo-engine and luxprecompile-sys are published.
-# Also depends on the local net hanzo-pqc (publish = false).
-publish = false
 
 [features]
 default = []
@@ -35,10 +32,10 @@ hanzo-pqc = { workspace = true }
 # process-global and populated at startup by `hanzo-node` (or any other
 # binary embedding hanzo-vm). If no engine is registered the precompile
 # dispatchers revert — there is no in-tree fallback.
-hanzo-engine = { path = "../../engine/hanzo-engine" }
+hanzo-engine = { version = "0.6.0", path = "../../engine/hanzo-engine" }
 
 # Canonical Go-backed precompile dispatch (Quasar, ML-DSA, etc.)
-luxprecompile-sys = { path = "../../../lux/precompile/bindings/rust" }
+luxprecompile-sys = "0.1"
 
 # State storage (bundled SQLite for dev; MPT later)
 rusqlite = { workspace = true }

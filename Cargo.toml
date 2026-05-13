@@ -1,10 +1,13 @@
 [workspace]
 members = [
+  "hanzo-agentic",
+  "hanzo-ai-format",
   "hanzo-api",
   "hanzo-brain",
+  "hanzo-compute",
   "hanzo-config",
+  "hanzo-consensus",
   "hanzo-database",
-  # "hanzo-db", # Excluded: not in publish list, has feature-gated dependencies
   "hanzo-db-sqlite",
   "hanzo-did",
   "hanzo-embed",
@@ -14,37 +17,25 @@ members = [
   "hanzo-identity",
   "hanzo-job-queue-manager",
   "hanzo-jobs",
-  # "hanzo-kbs", # Excluded: incomplete implementation with missing types
   "hanzo-l2",
   "hanzo-libp2p",
   "hanzo-libp2p-relayer",
+  "hanzo-machine",
   "hanzo-mcp",
   "hanzo-messages",
   "hanzo-mining",
-  "hanzo-vm",
-  "hanzo-machine",
-  "hanzo-consensus",
-  "hanzo-compute",
-  "hanzo-ai-format",
   "hanzo-model-discovery",
   "hanzo-models",
   "hanzo-pqc",
   "hanzo-runner",
   "hanzo-runtime",
   "hanzo-runtime-tests",
-  # "hanzo-sheet", # Excluded: depends on non-existent sheet module
-  # "hanzo-simulation",
-  # "hanzo-tests", # Excluded: test-only crate with compilation errors
   "hanzo-tools",
   "hanzo-tools-runner",
+  "hanzo-vm",
   "hanzo-wasm",
   "hanzo-wasm-runtime",
   "hanzo-zap",
-  "hanzo-agentic",
-  # "hanzo-sovereign", # Excluded: ml-dsa 0.6 doesn't exist on crates.io (only prerelease 0.1.0-rc.x)
-]
-exclude = [
-  "hanzo-sovereign",
 ]
 resolver = "2"
 
@@ -55,10 +46,13 @@ authors = ["Nico Arqueros <nico@hanzo.ai>"]
 repository = "https://github.com/hanzonet/network"
 
 [workspace.dependencies]
+hanzo-ai-format = { path = "./hanzo-ai-format", version = "1.1.21" }
 hanzo-api = { path = "./hanzo-api", version = "1.1.13" }
+hanzo-brain = { path = "./hanzo-brain", version = "0.1.0" }
+hanzo-compute = { path = "./hanzo-compute", version = "1.1.21" }
 hanzo-config = { path = "./hanzo-config", version = "1.1.21", package = "hanzonet-config" }
+hanzo-consensus = { path = "./hanzo-consensus", version = "1.1.20" }
 hanzo-database = { path = "./hanzo-database", version = "1.1.13" }
-hanzo-db = { path = "./hanzo-db", version = "0.1.1" }
 hanzo-db-sqlite = { path = "./hanzo-db-sqlite", version = "1.1.13" }
 hanzo-did = { path = "./hanzo-did", version = "1.1.21", package = "hanzonet-did" }
 hanzo-embed = { path = "./hanzo-embed", version = "1.1.13" }
@@ -68,32 +62,25 @@ hanzo-http-api = { path = "./hanzo-http-api", version = "1.1.21" }
 hanzo-identity = { path = "./hanzo-identity", version = "1.1.13" }
 hanzo-job-queue-manager = { path = "./hanzo-job-queue-manager", version = "1.1.21" }
 hanzo-jobs = { path = "./hanzo-jobs", version = "1.1.13" }
-hanzo-kbs = { path = "./hanzo-kbs", version = "1.1.11" }
 hanzo-l2 = { path = "./hanzo-l2", version = "1.1.20" }
 hanzo-libp2p = { path = "./hanzo-libp2p", version = "1.1.13" }
 hanzo-libp2p-relayer = { path = "./hanzo-libp2p-relayer", version = "1.1.13" }
+hanzo-machine = { path = "./hanzo-machine", version = "1.1.21" }
 hanzo-mcp = { path = "./hanzo-mcp", version = "1.1.21", package = "hanzonet-mcp" }
 hanzo-messages = { path = "./hanzo-messages", version = "1.1.13" }
 hanzo-mining = { path = "./hanzo-mining", version = "1.1.21" }
-hanzo-consensus = { path = "./hanzo-consensus", version = "1.1.20" }
-hanzo-compute = { path = "./hanzo-compute", version = "1.1.21" }
-hanzo-ai-format = { path = "./hanzo-ai-format", version = "1.1.21" }
 hanzo-model-discovery = { path = "./hanzo-model-discovery", version = "1.1.13" }
 hanzo-models = { path = "./hanzo-models", version = "1.1.13" }
 hanzo-pqc = { path = "./hanzo-pqc", version = "1.1.21", package = "hanzonet-pqc" }
 hanzo-runner = { path = "./hanzo-runner", version = "1.1.13" }
 hanzo-runtime = { path = "./hanzo-runtime", version = "1.1.13" }
 hanzo-runtime-tests = { path = "./hanzo-runtime-tests", version = "0.1.2" }
-hanzo-sheet = { path = "./hanzo-sheet", version = "0.1.1" }
-hanzo-tests = { path = "./hanzo-tests", version = "0.1.1" }
 hanzo-tools = { path = "./hanzo-tools", version = "1.1.21" }
 hanzo-tools-runner = { path = "./hanzo-tools-runner", version = "1.0.2" }
-hanzo-wasm = { path = "./hanzo-wasm", version = "0.1.2" }
 hanzo-vm = { path = "./hanzo-vm", version = "1.1.21" }
-hanzo-machine = { path = "./hanzo-machine", version = "1.1.21" }
+hanzo-wasm = { path = "./hanzo-wasm", version = "0.1.2" }
 hanzo-wasm-runtime = { path = "./hanzo-wasm-runtime", version = "1.1.21" }
 hanzo-zap = { path = "./hanzo-zap", version = "0.6.75" }
-hanzo-brain = { path = "./hanzo-brain", version = "0.1.0" }
 
 rmcp = { version = "0.8" }
 futures = "0.3.30"
