@@ -1,0 +1,164 @@
+[workspace]
+members = [
+  "hanzo-api",
+  "hanzo-brain",
+  "hanzo-config",
+  "hanzo-database",
+  # "hanzo-db", # Excluded: not in publish list, has feature-gated dependencies
+  "hanzo-db-sqlite",
+  "hanzo-did",
+  "hanzo-embed",
+  "hanzo-fs",
+  "hanzo-hmm",
+  "hanzo-http-api",
+  "hanzo-identity",
+  "hanzo-job-queue-manager",
+  "hanzo-jobs",
+  # "hanzo-kbs", # Excluded: incomplete implementation with missing types
+  "hanzo-l2",
+  "hanzo-libp2p",
+  "hanzo-libp2p-relayer",
+  "hanzo-mcp",
+  "hanzo-messages",
+  "hanzo-mining",
+  "hanzo-vm",
+  "hanzo-machine",
+  "hanzo-consensus",
+  "hanzo-compute",
+  "hanzo-ai-format",
+  "hanzo-model-discovery",
+  "hanzo-models",
+  "hanzo-pqc",
+  "hanzo-runner",
+  "hanzo-runtime",
+  "hanzo-runtime-tests",
+  # "hanzo-sheet", # Excluded: depends on non-existent sheet module
+  # "hanzo-simulation",
+  # "hanzo-tests", # Excluded: test-only crate with compilation errors
+  "hanzo-tools",
+  "hanzo-tools-runner",
+  "hanzo-wasm",
+  "hanzo-wasm-runtime",
+  "hanzo-zap",
+]
+resolver = "2"
+
+[workspace.package]
+version = "1.1.20"
+edition = "2021"
+authors = ["Nico Arqueros <nico@hanzo.ai>"]
+
+[workspace.dependencies]
+hanzo-api = { path = "./hanzo-api", version = "1.1.12" }
+hanzo-config = { path = "./hanzo-config", version = "1.1.19" }
+hanzo-database = { path = "./hanzo-database", version = "1.1.12" }
+hanzo-db = { path = "./hanzo-db", version = "0.1.1" }
+hanzo-db-sqlite = { path = "./hanzo-db-sqlite", version = "1.1.12" }
+hanzo-did = { path = "./hanzo-did", version = "1.1.11" }
+hanzo-embed = { path = "./hanzo-embed", version = "1.1.12" }
+hanzo-fs = { path = "./hanzo-fs" }
+hanzo-hmm = { path = "./hanzo-hmm", version = "0.1.1" }
+hanzo-http-api = { path = "./hanzo-http-api" }
+hanzo-identity = { path = "./hanzo-identity", version = "1.1.12" }
+hanzo-job-queue-manager = { path = "./hanzo-job-queue-manager" }
+hanzo-jobs = { path = "./hanzo-jobs", version = "1.1.12" }
+hanzo-kbs = { path = "./hanzo-kbs", version = "1.1.11" }
+hanzo-l2 = { path = "./hanzo-l2", version = "1.1.19" }
+hanzo-libp2p = { path = "./hanzo-libp2p", version = "1.1.12" }
+hanzo-libp2p-relayer = { path = "./hanzo-libp2p-relayer", version = "1.1.12" }
+hanzo-mcp = { path = "./hanzo-mcp", version = "1.1.11" }
+hanzo-messages = { path = "./hanzo-messages", version = "1.1.12" }
+hanzo-mining = { path = "./hanzo-mining", version = "1.1.19" }
+hanzo-consensus = { path = "./hanzo-consensus", version = "1.1.19" }
+hanzo-compute = { path = "./hanzo-compute", version = "1.1.19" }
+hanzo-ai-format = { path = "./hanzo-ai-format", version = "1.1.19" }
+hanzo-model-discovery = { path = "./hanzo-model-discovery", version = "1.1.12" }
+hanzo-models = { path = "./hanzo-models", version = "1.1.12" }
+hanzo-pqc = { path = "./hanzo-pqc", version = "1.1.12" }
+hanzo-runner = { path = "./hanzo-runner", version = "1.1.12" }
+hanzo-runtime = { path = "./hanzo-runtime", version = "1.1.12" }
+hanzo-runtime-tests = { path = "./hanzo-runtime-tests", version = "0.1.1" }
+hanzo-sheet = { path = "./hanzo-sheet", version = "0.1.1" }
+hanzo-tests = { path = "./hanzo-tests", version = "0.1.1" }
+hanzo-tools = { path = "./hanzo-tools" }
+hanzo-tools-runner = { path = "./hanzo-tools-runner", version = "1.0.1" }
+hanzo-wasm = { path = "./hanzo-wasm", version = "0.1.1" }
+hanzo-vm = { path = "./hanzo-vm", version = "1.1.19" }
+hanzo-machine = { path = "./hanzo-machine", version = "1.1.19" }
+hanzo-wasm-runtime = { path = "./hanzo-wasm-runtime", version = "1.1.19" }
+hanzo-zap = { path = "./hanzo-zap", version = "0.1.0" }
+
+rmcp = { version = "0.8" }
+futures = "0.3.30"
+keyphrases = "0.3.3"
+tokio = { version = "1.36", features = [
+  "rt",
+  "rt-multi-thread",
+  "macros",
+  "fs",
+  "io-util",
+  "net",
+  "sync",
+  "time",
+] }
+tokio-util = "0.7.13"
+bincode = "1.3.3"
+log = "0.4.20"
+chrono = "0.4"
+serde_json = "1.0.117"
+anyhow = "1.0.94"
+blake3 = "1.2.0"
+sha2 = "0.10"
+serde = "1.0.219"
+base64 = "0.22.0"
+reqwest = "0.11.27"
+regex = "1"
+uuid = { version = "1.6.1" }
+rand = "=0.8.5"
+hex = "=0.4.3"
+env_logger = "0.11.5"
+async-trait = "0.1.74"
+ed25519-dalek = { version = "2.1.1", features = ["rand_core"] }
+x25519-dalek = { version = "2.0.1", features = ["static_secrets"] }
+tempfile = "3.19"
+lazy_static = "1.5.0"
+async-channel = "1.6.1"
+csv = "1.1.6"
+thiserror = "2.0.3"
+dashmap = "5.5.3"
+hpke = "0.12"
+chacha20poly1305 = "0.10"
+clap = "3.0.0-beta.5"
+r2d2 = "0.8.10"
+r2d2_sqlite = "0.25"
+rusqlite = { version = "0.32.1", features = ["bundled"] }
+os_path = "0.8.0"
+utoipa = "4.2.3"
+warp = "0.3.7"
+once_cell = "1.21"
+home = "0.5"
+strip-ansi-escapes = "0.2"
+tracing = "0.1.40"
+serde_yaml = "0.9.34-deprecated"
+tokio-tungstenite = "0.26.2"
+rustls = "0.23.27"
+dirs = "5.0"
+libp2p = { version = "0.55.0", features = [
+  "noise",
+  "yamux",
+  "tcp",
+  "quic",
+  "dcutr",
+  "identify",
+  "ping",
+  "relay",
+  "request-response",
+  "json",
+  "tokio",
+  "macros",
+] }
+
+# Dev dependencies
+criterion = "0.5"
+proptest = "1.0"
+tokio-test = "0.4"

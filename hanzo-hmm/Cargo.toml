@@ -1,0 +1,40 @@
+[package]
+name = "hanzo-hmm"
+description = "Hidden Markov Model + Hamiltonian MarketMaker for heterogeneous compute pricing"
+license = "MIT"
+version = "0.1.1"
+edition = { workspace = true }
+authors = { workspace = true }
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+log = { workspace = true }
+
+nalgebra = { version = "0.33", features = ["serde-serialize"] }
+ndarray = "0.16"
+statrs = "0.17"
+rand = { workspace = true }
+rand_distr = "0.4"
+num-traits = "0.2"
+
+rusqlite = { workspace = true }
+r2d2 = { workspace = true }
+r2d2_sqlite = { workspace = true }
+dashmap = { workspace = true }
+chrono = { workspace = true }
+bincode = { workspace = true }
+
+
+bitvec = { version = "1.0", features = ["serde"] }
+half = { version = "2.4", features = ["serde"] }
+ode_solvers = "0.3"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
+pretty_assertions = "1.0"
+tempfile = { workspace = true }
