@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: hanzo_node
+  description: ''
+  contact:
+    name: Nico Arqueros
+    email: nico@hanzo.com
+  license:
+    name: ''
+  version: 0.8.4
+paths:
+  /v2/add_hanzo_tool:
+    post:
+      tags:
+      - crate
+      operationId: add_hanzo_tool_handler
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HanzoTool'
+        required: true
+      responses:
+        '200':
+          description: Successfully added Hanzo tool
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  /v2/get_hanzo_tool:
+    get:
+      tags:
+      - crate
+      operationId: get_hanzo_tool_handler
+      parameters:
+      - name: tool_name
+        in: query
+        description: Name of the Hanzo tool
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successfully retrieved Hanzo tool
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  /v2/list_all_hanzo_tools:
+    get:
+      tags:
+      - crate
+      operationId: list_all_hanzo_tools_handler
+      responses:
+        '200':
+          description: Successfully listed all Hanzo tools
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  /v2/search_hanzo_tool:
+    get:
+      tags:
+      - crate
+      operationId: search_hanzo_tool_handler
+      parameters:
+      - name: query
+        in: query
+        description: Search query for Hanzo tools
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successfully searched Hanzo tools
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+
+  /v2/set_hanzo_tool:
+    post:
+      tags:
+      - crate
+      operationId: set_hanzo_tool_handler
+      parameters:
+      - name: tool_name
+        in: query
+        description: Key name of the Hanzo tool
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        '200':
+          description: Successfully set Hanzo tool
+          content:
+            text/plain:
+              schema:
+                type: boolean
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+
+components:
+  schemas:
+    APIError:
+      type: object
+      required:
+      - code
+      - error
+      - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          minimum: 0
+        error:
+          type: string
+        message:
+          type: string
+    
+tags:
+- name: workflows
+  description: Workflow API endpoints

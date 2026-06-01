@@ -1,0 +1,19 @@
+[package]
+name = "zoo-non-rust-code"
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+description = "Model Context Protocol implementation"
+license = { workspace = true }
+repository = { workspace = true }
+homepage = { workspace = true }
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+# Remove hanzo_non_rust_code dependency - not needed since we're wrapping functionality
+zoo-tools-runner = { workspace = true }
+tempfile = { workspace = true }
+zoo-message-primitives = { workspace = true }
+log = { workspace = true }

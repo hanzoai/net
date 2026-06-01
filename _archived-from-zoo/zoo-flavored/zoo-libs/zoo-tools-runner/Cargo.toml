@@ -1,0 +1,16 @@
+[package]
+name = "zoo-tools-runner"
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+description = "Thin wrapper around hanzo_tools_runner with zoo-specific extensions"
+license = { workspace = true }
+repository = { workspace = true }
+homepage = { workspace = true }
+
+[features]
+built-in-tools = ["hanzo-tools-runner/built-in-tools"]
+
+[dependencies]
+hanzo-tools-runner = { workspace = true }
+serde = { workspace = true, features = ["derive"] }

@@ -1,0 +1,24 @@
+[package]
+name = "zoo-crypto-identities"
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+description = "Model Context Protocol implementation"
+license = { workspace = true }
+repository = { workspace = true }
+homepage = { workspace = true }
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { workspace = true }
+serde_json = { workspace = true }
+zoo-message-primitives = { workspace = true }
+x25519-dalek = { workspace = true }
+ed25519-dalek = { workspace = true }
+chrono = { workspace = true }
+dashmap = { workspace = true }
+lazy_static = { workspace = true }
+trust-dns-resolver = "0.23.2"
+zoo-non-rust-code = { workspace = true }
+tempfile = { workspace = true }

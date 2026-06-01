@@ -327,7 +327,7 @@ fn exec_quasar_query(input: &[u8]) -> PrecompileResult {
     // The committee membership decision is derived from the canonical
     // Verkle verification result. Failure to dispatch is a hard error —
     // not a silent zero — so the EVM caller learns the actual reason.
-    let res = match luxprecompile_sys::run(LUX_QUASAR_ADDR, &witness, 1_000_000) {
+    let res = match lux_precompile::run(LUX_QUASAR_ADDR, &witness, 1_000_000) {
         Ok(r) => r,
         Err(err) => {
             return PrecompileResult::Revert {
@@ -614,7 +614,7 @@ mod tests {
     #[test]
     fn exec_quasar_query_routes_through_libluxprecompile() {
         // Confirm the address is registered in the live dylib.
-        let registry = luxprecompile_sys::list().expect("list precompiles");
+        let registry = lux_precompile::list().expect("list precompiles");
         let found = registry
             .iter()
             .any(|p| p.address.eq_ignore_ascii_case(LUX_QUASAR_ADDR));

@@ -6533,7 +6533,7 @@ dependencies = [
 
 [[package]]
 name = "hanzo-vm"
-version = "1.1.21"
+version = "1.1.22"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -6542,7 +6542,7 @@ dependencies = [
  "hanzonet-pqc",
  "hex",
  "log",
- "luxprecompile-sys",
+ "lux-precompile",
  "rusqlite",
  "serde",
  "serde_json",
@@ -9318,10 +9318,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "luxprecompile-sys"
+name = "lux-precompile"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f152fe85e7080ed60e68da4348079167e0329b9da964d3dba604efd9ca0f891"
+checksum = "1a90de09ad525c308a7f76514411b0167e5b68a520618a6efc58e6a12d7e779b"
 dependencies = [
  "serde",
  "serde_json",

@@ -1,0 +1,54 @@
+[package]
+name = "zoo-libp2p-relayer"
+version = "1.1.35"
+edition = "2021"
+authors = [ "Zoo Foundation <dev@zoo.ngo>",]
+description = "Model Context Protocol implementation"
+license = "MIT"
+repository = "https://github.com/zooai/node"
+homepage = "https://zoo.ai"
+
+[dependencies]
+serde_json = "1.0.117"
+clap = { version = "4.5", features = ["derive", "env"] }
+rand = "0.8.5"
+hex = "0.4.3"
+chrono = "0.4"
+dotenv = "0.15.0"
+derivative = "2.2"
+thiserror = "2.0.12"
+reqwest = { version = "0.11.27", features = ["json"] }
+dashmap = "5.5.3"
+zoo-message-primitives = { workspace = true }
+zoo-crypto-identities = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3.19"
+
+[dependencies.tokio]
+version = "1.36"
+features = [ "io-util", "macros", "rt-multi-thread", "fs", "sync", "time", "rt", "full", "net",]
+
+[dependencies.serde]
+version = "1.0.219"
+features = [ "derive",]
+
+zoo-message-primitives = { workspace = true }
+
+zoo-crypto-identities = { workspace = true }
+
+[dependencies.x25519-dalek]
+version = "2.0.1"
+features = [ "static_secrets",]
+
+[dependencies.ed25519-dalek]
+version = "2.1.1"
+features = [ "rand_core",]
+
+[dependencies.uuid]
+version = "1.6.1"
+features = [ "v4",]
+
+[dependencies.libp2p]
+version = "0.55.0"
+features = [ "noise", "yamux", "tcp", "quic", "dcutr", "identify", "ping", "relay", "request-response", "json", "tokio", "macros",]
