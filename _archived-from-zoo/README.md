@@ -2,7 +2,7 @@
 
 Provenance: All content here was misplaced under `~/work/zoo/node/` (the
 canonical Zoo node — which is and always was meant to be Go, a
-luxfi/node fork like `~/work/liquidity/node`). The Rust workspace
+luxfi/node downstream fork). The Rust workspace
 predated the Go rewrite and was kept dormant in the working tree.
 On 2026-05-21 it was lifted into this archive directory inside
 `~/work/hanzo/net/_archived-from-zoo/` so the Zoo node can be a clean
