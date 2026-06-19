@@ -1,13 +1,7 @@
-# net
+# Hanzo Net
 
-Run your own AI cluster at home with everyday devices. Maintained by [net labs](https://x.com/netlabs).
+Hanzo Net unifies your devices into a single distributed AI cluster — run models across your own hardware, from laptops and phones to GPUs and edge nodes.
 
-
-<h3>
-
-[Discord](https://discord.gg/EUnjGpsmWw) | [Telegram](https://t.me/+Kh-KqHTzFYg3MGNk) | [X](https://x.com/netlabs)
-
-</h3>
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/hanzoai/net)](https://github.com/hanzoai/net/stargazers)
 [![Tests](https://dl.circleci.com/status-badge/img/circleci/TrkofJDoGzdQAeL6yVHKsg/4i5hJuafuwZYZQxbRAWS71/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/TrkofJDoGzdQAeL6yVHKsg/4i5hJuafuwZYZQxbRAWS71/tree/main)
@@ -21,14 +15,9 @@ Run your own AI cluster at home with everyday devices. Maintained by [net labs](
 
 Unify your existing devices into one powerful GPU: iPhone, iPad, Android, Mac, NVIDIA, Raspberry Pi, pretty much any device!
 
-<div align="center">
-  <h2>Update: net is hiring. See <a href="https://netlabs.net">here</a> for more details.</h2>
-  <h2>Interested in running net in your business? <a href="mailto:hello@netlabs.net">Contact us</a> to discuss.</h2>
-</div>
-
 ## Get Involved
 
-net is **experimental** software. Expect bugs early on. Create issues so they can be fixed. The [net labs](https://x.com/netlabs) team will strive to resolve issues quickly.
+Hanzo Net is **experimental** software. Expect bugs early on. Create issues so they can be fixed and we will strive to resolve them quickly.
 
 We also welcome contributions from the community. We have a list of bounties in [this sheet](https://docs.google.com/spreadsheets/d/1cTCpTIp48UnnIvHeLEUNg1iMy_Q6lRybgECSFCoVJpE/edit?usp=sharing).
 
