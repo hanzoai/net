@@ -110,6 +110,25 @@ impl HamiltonianDynamics {
     pub fn set_potential(&mut self, potential: Box<dyn PotentialFunction>) {
         self.potential = potential;
     }
+
+    /// Set the phase space state directly. Enables deterministic seeding of
+    /// `(q, p)` from an external source (e.g. a market imbalance) without the
+    /// stochastic `perturb`/`PriceDynamics::update` path, so evolution is
+    /// reproducible. Errors if the supplied state's dimension does not match.
+    pub fn set_phase_space(&mut self, phase_space: PhaseSpace) -> Result<()> {
+        if phase_space.positions.len() != self.dimension
+            || phase_space.momenta.len() != self.dimension
+        {
+            return Err(anyhow::anyhow!(
+                "phase space dimension mismatch: expected {}, got positions={} momenta={}",
+                self.dimension,
+                phase_space.positions.len(),
+                phase_space.momenta.len()
+            ));
+        }
+        self.phase_space = phase_space;
+        Ok(())
+    }
     
     /// Inject energy into the system (perturbation)
     pub fn perturb(&mut self, energy: f64) -> Result<()> {

@@ -18,6 +18,7 @@ pub mod routing;
 pub mod adapter;
 pub mod storage;
 pub mod free_energy;
+pub mod compute_price;
 
 use std::sync::Arc;
 
@@ -31,6 +32,10 @@ pub use routing::{Router, RoutingDecision, ModelSelection};
 pub use adapter::{UserAdapter, AdapterManager};
 pub use storage::{Storage, VectorIndex};
 pub use free_energy::{ExpectedFreeEnergy, BeliefState, Precision};
+pub use compute_price::{
+    price, ComputeJob, HanzoPrice, MarketState, QualityTier, ResourceKind, MAX_PRICE_WEI,
+    MIN_PRICE_WEI, WEI_PER_HANZO,
+};
 
 /// Main MarketMaker system configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
