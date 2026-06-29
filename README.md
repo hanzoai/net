@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="net" width="880"></p>
+
 # hanzonet/network — archived
 
 > **This monorepo has been split into 36 focused repositories** under the
