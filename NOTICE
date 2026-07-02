@@ -1,0 +1,36 @@
+Hanzo Net
+Copyright (c) 2025 Hanzo AI, Inc.
+
+This product includes software from exo (https://github.com/exo-explore/exo),
+maintained by exo labs (Exo Technologies Ltd.), licensed under the GNU General
+Public License, version 3 (GPL-3.0):
+
+    Copyright (c) 2024 exo labs (Exo Technologies Ltd.)
+
+Hanzo Net is a fork of exo. It was forked while exo was licensed under
+GPL-3.0, and Hanzo Net therefore REMAINS licensed under GPL-3.0 (see the
+LICENSE file). Hanzo AI has NOT relicensed this work.
+
+  Upstream note: exo relicensed to Apache-2.0 with exo v1.0 (December 2025),
+  which is AFTER the point at which this fork was taken (the exo -> Hanzo
+  rebrand landed August 2025). This fork predates that relicense and is
+  distributed under GPL-3.0. Any future re-synchronization from current exo
+  (Apache-2.0) must track the Apache-2.0 license separately for the newly
+  imported code; it does not retroactively change the license of this tree.
+
+Modifications by Hanzo AI, Inc. (per GPL-3.0 section 5, stating changes):
+renamed the `exo` Python package to `net` and rebranded the UI to
+"Hanzo Cluster"; responsive CLI rendering for small terminals; real QR-code
+generation and mobile WebGPU onboarding; host/port configuration; and
+graceful-shutdown handling. See the git history for the full, dated record
+of changes.
+
+--------------------------------------------------------------------------
+
+This product also includes model code from MLX examples
+(https://github.com/ml-explore/mlx-examples), licensed under the MIT License:
+
+    Copyright (c) 2024 Apple Inc.
+
+  e.g. src/net/inference/mlx/models/llava.py (upstream copyright header
+  retained in-file).
