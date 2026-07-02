@@ -282,3 +282,23 @@ net supports the following inference engines:
 
 - ✅ [GRPC](net/networking/grpc)
 - 🚧 NCCL
+
+## License and Attribution
+
+Hanzo Net is licensed under the **GNU General Public License v3.0 (GPL-3.0)** —
+see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+Hanzo Net is a fork of [exo](https://github.com/exo-explore/exo) (exo labs /
+Exo Technologies Ltd.). It was forked while exo was licensed under GPL-3.0 and
+therefore remains GPL-3.0; Hanzo has not relicensed it. Upstream exo has since
+relicensed to Apache-2.0 (exo v1.0, December 2025), which is after this fork was
+taken and does not change the license of this tree. A summary of Hanzo's
+modifications is in [NOTICE](NOTICE); the full dated record is in the git
+history. Vendored MLX example model code (e.g.
+`src/net/inference/mlx/models/llava.py`) is © Apple Inc. under the MIT License.
+
+Because GPL-3.0 is a strong-copyleft license, importing the `net` Python
+package into another distributed program makes that program a GPL-3.0 work.
+Use Hanzo Net as a standalone service via its HTTP API (a separate process
+communicating over the network is not linking) rather than importing it into
+permissively licensed (Apache/MIT) code.
