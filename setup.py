@@ -91,7 +91,7 @@ _add_gpu_requires()
 setup(
   name="hanzo-net",
   version="0.1.20",
-  description="Hanzo Network - Distributed AI compute network for running models locally and remotely",
+  description="Hanzo Net - Distributed AI compute network for running models locally and remotely",
   author="Hanzo AI",
   author_email="dev@hanzo.ai",
   url="https://github.com/hanzoai/net",
@@ -112,7 +112,7 @@ setup(
     "Operating System :: OS Independent",
   ],
   long_description="""
-Hanzo Network - Distributed AI compute network for running models locally and remotely.
+Hanzo Net - Distributed AI compute network for running models locally and remotely.
 
 **Platform Support:**
 - Linux: Full support

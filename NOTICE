@@ -7,6 +7,11 @@ Public License, version 3 (GPL-3.0):
 
     Copyright (c) 2024 exo labs (Exo Technologies Ltd.)
 
+Forked from https://github.com/exo-explore/exo (GPL-3.0). The exact upstream
+commit was not recorded at fork time; this tree was taken from exo's GPL-3.0
+line (package version 0.1.x) prior to the exo v1.0 (Apache-2.0) relicense of
+December 2025.
+
 Hanzo Net is a fork of exo. It was forked while exo was licensed under
 GPL-3.0, and Hanzo Net therefore REMAINS licensed under GPL-3.0 (see the
 LICENSE file). Hanzo AI has NOT relicensed this work.
@@ -24,6 +29,24 @@ renamed the `exo` Python package to `net` and rebranded the UI to
 generation and mobile WebGPU onboarding; host/port configuration; and
 graceful-shutdown handling. See the git history for the full, dated record
 of changes.
+
+DEVIATIONS (per GPL-3.0 section 5 — this fork differs from upstream exo as
+follows; see the git history for the dated, per-commit record):
+
+  - Renamed the upstream `exo` Python package to `net`; import path is
+    `net.*` and the console entry point is `hanzo-net`.
+  - Rebranded the product to "Hanzo Net" and the web UI to "Hanzo Cluster";
+    removed the upstream "tinychat" label from the Web Chat URL display.
+  - Published as the `hanzo-net` distribution under Hanzo AI, Inc.
+    (author dev@hanzo.ai, repository github.com/hanzoai/net).
+  - Responsive CLI rendering that adapts to terminal width for small screens.
+  - Real QR-code generation for onboarding that encodes the actual LAN IP
+    (not localhost) so phones and tablets can join the cluster.
+  - Mobile onboarding path with WebGPU support via the web UI.
+  - Configurable host and port for the node and its API.
+  - Graceful shutdown on Ctrl-C that suppresses spurious gRPC teardown errors.
+  - Added OSS attribution: this NOTICE plus retained upstream copyright
+    headers in vendored files.
 
 --------------------------------------------------------------------------
 
