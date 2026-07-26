@@ -27,6 +27,7 @@
 //!   (PQ signatures, quasar queries, AI inference/embeddings).
 
 pub mod block;
+pub mod evm;
 pub mod evm_backend;
 pub mod precompiles;
 pub mod state;
