@@ -9,6 +9,12 @@ repository = "https://github.com/hanzonet/network"
 
 [features]
 default = []
+# Forward the native CPU BLAS (Apple Accelerate) backend to the engine. Used by
+# the `precompile_infer` example to run real inference at a usable speed.
+accelerate = ["hanzo-engine/accelerate"]
+# Quasar committee-membership precompile (0x0102), routed through the native
+# Go-backed `libluxprecompile`. Off by default so pure-Rust builds link cleanly.
+quasar = ["dep:lux-precompile"]
 # Enable embedded Lux consensus for native L1 operation (requires lux monorepo)
 # consensus = ["lux-consensus"]
 
@@ -32,10 +38,17 @@ hanzo-pqc = { workspace = true }
 # process-global and populated at startup by `hanzo-node` (or any other
 # binary embedding hanzo-vm). If no engine is registered the precompile
 # dispatchers revert — there is no in-tree fallback.
-hanzo-engine = { version = "0.6.0", path = "../../engine/hanzo-engine" }
+hanzo-engine = { path = "../../engine/hanzo-engine" }
 
-# Canonical Go-backed precompile dispatch (Quasar, ML-DSA, etc.)
-lux-precompile = "0.1"
+# Canonical Go-backed precompile dispatch (Quasar). Optional: it links the
+# native `libluxprecompile` (built from the Lux/Go tree), which is not present in
+# pure-Rust builds. The AI inference/embedding precompiles do not need it, so it
+# is gated behind the `quasar` feature.
+lux-precompile = { version = "0.1", optional = true }
+
+# Real EVM bytecode interpreter — the AI precompiles (0x0201/0x0202) are wired
+# into its precompile set (see src/evm.rs) so deployed contracts can CALL them.
+revm = "36"
 
 # State storage (bundled SQLite for dev; MPT later)
 rusqlite = { workspace = true }
@@ -50,3 +63,7 @@ rusqlite = { workspace = true }
 [dev-dependencies]
 tokio-test = { workspace = true }
 tempfile = { workspace = true }
+# Loads a real Arc<Hanzo> for the `precompile_infer` example (the same builder
+# hanzo-node uses). Dev-only: it does not enter the production VM dependency set.
+# Accelerate reaches it via feature unification on the shared hanzo-engine.
+hanzo-server-core = { path = "../../engine/hanzo-server-core", default-features = false }

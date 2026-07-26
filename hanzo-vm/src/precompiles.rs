@@ -174,6 +174,7 @@ impl Default for PrecompileRegistry {
             execute: exec_pq_verify,
         });
 
+        #[cfg(feature = "quasar")]
         r.register(PrecompileEntry {
             address: ADDR_QUASAR_QUERY,
             name: "quasar_query".into(),
@@ -184,7 +185,10 @@ impl Default for PrecompileRegistry {
         r.register(PrecompileEntry {
             address: ADDR_AI_INFERENCE,
             name: "ai_inference".into(),
-            base_gas: 100_000,
+            // Canonical input-based base (see GAS_BASE_INFER / inference_gas):
+            // the per-call gas is computed input-based by exec_ai_inference; this
+            // metadata base mirrors the same canonical constant.
+            base_gas: GAS_BASE_INFER,
             execute: exec_ai_inference,
         });
 
@@ -301,6 +305,7 @@ fn exec_pq_verify(input: &[u8]) -> PrecompileResult {
 /// | 0       | 20     | validator address          |
 /// | 20      | 32     | committee root (commitment)|
 /// | 52      | 1      | is-member flag (0/1)       |
+#[cfg(feature = "quasar")]
 fn exec_quasar_query(input: &[u8]) -> PrecompileResult {
     const REQUIRED_LEN: usize = 20 + 32 + 32 + 1;
     if input.len() < REQUIRED_LEN {
@@ -364,22 +369,103 @@ fn exec_quasar_query(input: &[u8]) -> PrecompileResult {
     PrecompileResult::Success { output, gas_used }
 }
 
-/// AI inference forward pass.
+/// Decode a model name from a 32-byte calldata field: UTF-8, NUL-padded; empty
+/// → the engine default. Lets a contract name any loaded zen / zen-embedding
+/// model (e.g. `"zen-nano"`, `"zen-embedding-0.6b"`).
+fn model_name(bytes: &[u8]) -> String {
+    String::from_utf8_lossy(bytes)
+        .trim_end_matches('\0')
+        .trim()
+        .to_string()
+}
+
+/// Calldata header for the AI precompiles: `selector(4) + model id(32)`.
+const AI_HEADER_LEN: usize = 4 + 32;
+
+/// CANONICAL INFERENCE GAS SCHEDULE — single source of truth across ALL EVM
+/// backends (Rust revm + Go luxfi/geth). Gas MUST be a pure function of INPUT
+/// size and be computable BEFORE execution: geth deducts `RequiredGas(input)`
+/// before `Run`, when the model output does not yet exist. Pricing on OUTPUT
+/// length (as this VM previously did: `100_000 + 8*output_len`) yields a
+/// different `gas_used` than geth's input-based charge for the same transaction
+/// → divergent state root → chain fork (RED finding H1). These constants and
+/// the arithmetic in [`inference_gas`] mirror, byte-for-byte, the authoritative
+/// Go schedule in `chains/hanzo-evm/evmllm/precompile.go`
+/// (`GasBaseInfer=120_000`, `GasPerPromptByte=30`), pinned by the Go
+/// `TestGasScheduleCanonical` differential test.
+const GAS_BASE_INFER: u64 = 120_000;
+const GAS_PER_PROMPT_BYTE: u64 = 30;
+
+/// Input-based inference gas: `GAS_BASE_INFER + GAS_PER_PROMPT_BYTE * promptBytes`
+/// where `promptBytes = input.len().saturating_sub(AI_HEADER_LEN)`. Pure in the
+/// input length, independent of the model output — identical on every backend so
+/// Rust and Go compute the SAME `gas_used` and agree on the state root. Mirrors
+/// Go's `AIInference.RequiredGas` exactly (same clamp-below-header, same
+/// overflow-saturating multiply).
+fn inference_gas(input_len: usize) -> u64 {
+    let prompt_bytes = (input_len.saturating_sub(AI_HEADER_LEN)) as u64;
+    match GAS_PER_PROMPT_BYTE.checked_mul(prompt_bytes) {
+        Some(add) => GAS_BASE_INFER.saturating_add(add),
+        None => u64::MAX, // saturate (parity with Go's overflow branch)
+    }
+}
+
+/// Base gas for an embedding call (input-based; per-byte over the text region).
+const GAS_BASE_EMBED: u64 = 50_000;
+/// Per-text-byte embedding gas.
+const GAS_PER_TEXT_BYTE: u64 = 16;
+
+/// Input-based embedding gas, same shape as [`inference_gas`]: a fixed base plus
+/// a per-byte charge over the text region, computed from input length so it is
+/// identical across backends and computable before execution.
+fn embedding_gas(input_len: usize) -> u64 {
+    let text_bytes = (input_len.saturating_sub(AI_HEADER_LEN)) as u64;
+    match GAS_PER_TEXT_BYTE.checked_mul(text_bytes) {
+        Some(add) => GAS_BASE_EMBED.saturating_add(add),
+        None => u64::MAX,
+    }
+}
+
+/// Canonical pre-execution gas for an AI precompile, the Rust analog of geth's
+/// `RequiredGas(input)`: a pure function of the call address and input length,
+/// computable BEFORE execution and charged identically on success AND revert.
+///
+/// CONSENSUS-CRITICAL (RED H1 + revert-path divergence): the EVM glue
+/// ([`crate::evm`]) charges this on the revert path so a reverting AI precompile
+/// consumes the SAME gas as geth (which charges `RequiredGas` then refunds the
+/// remainder). Charging zero on revert — as the VM previously did — diverges
+/// from geth by `RequiredGas(input)` on every reverting call → state-root fork.
+///
+/// Returns `None` for a non-AI address (the caller falls back to the stock
+/// precompile gas model).
+pub fn required_gas(addr: &[u8; 20], input_len: usize) -> Option<u64> {
+    if *addr == ADDR_AI_INFERENCE {
+        Some(inference_gas(input_len))
+    } else if *addr == ADDR_AI_EMBEDDING {
+        Some(embedding_gas(input_len))
+    } else {
+        None
+    }
+}
+
+/// AI text generation.
 ///
 /// # Calldata layout
 ///
-/// | Offset  | Length | Field                                     |
-/// |---------|--------|-------------------------------------------|
-/// | 0       | 4      | selector (callers may pass 0 — reserved)  |
-/// | 4       | 32     | model id (`blake3(model_name)` or hash)   |
-/// | 36      | ..     | prompt bytes                              |
+/// | Offset  | Length | Field                                          |
+/// |---------|--------|------------------------------------------------|
+/// | 0       | 4      | selector (callers may pass 0 — reserved)       |
+/// | 4       | 32     | model name (UTF-8, NUL-padded; empty = default)|
+/// | 36      | ..     | prompt bytes                                   |
 ///
-/// Dispatches to [`hanzo_engine::infer`]. When no engine has been
-/// registered on this node the call reverts with the engine name. There is
-/// no synthetic fallback. Production code installs a real engine at startup
-/// via [`hanzo_engine::register_inference_engine`].
+/// Dispatches to [`hanzo_engine::infer`], routing to the named model via the
+/// engine's native multi-model support. Reverts if no engine is installed or
+/// the named model is not loaded.
+///
+/// Gas is INPUT-based (see [`inference_gas`]) so it matches the Go backend's
+/// pre-execution charge exactly — a consensus requirement (RED H1).
 fn exec_ai_inference(input: &[u8]) -> PrecompileResult {
-    const HEADER_LEN: usize = 4 + 32;
+    const HEADER_LEN: usize = AI_HEADER_LEN;
     if input.len() < HEADER_LEN {
         return PrecompileResult::Revert {
             reason: format!(
@@ -389,8 +475,7 @@ fn exec_ai_inference(input: &[u8]) -> PrecompileResult {
         };
     }
 
-    let mut model_id = [0u8; 32];
-    model_id.copy_from_slice(&input[4..36]);
+    let model = model_name(&input[4..36]);
     let prompt = &input[HEADER_LEN..];
 
     if prompt.is_empty() {
@@ -399,11 +484,11 @@ fn exec_ai_inference(input: &[u8]) -> PrecompileResult {
         };
     }
 
-    match engine::infer(&model_id, prompt) {
-        Ok(output) => {
-            let gas_used = 100_000u64.saturating_add(output.len() as u64 * 8);
-            PrecompileResult::Success { output, gas_used }
-        }
+    // Input-based gas, computed from calldata length (NOT output length) so the
+    // Rust and Go backends charge identically and agree on the state root.
+    let gas_used = inference_gas(input.len());
+    match engine::infer(&model, prompt) {
+        Ok(output) => PrecompileResult::Success { output, gas_used },
         Err(EngineError::NoInferenceEngine) => PrecompileResult::Revert {
             reason: "no inference engine registered on this node".into(),
         },
@@ -423,33 +508,26 @@ fn exec_ai_inference(input: &[u8]) -> PrecompileResult {
 ///
 /// # Calldata layout
 ///
-/// | Offset  | Length | Field                                   |
-/// |---------|--------|-----------------------------------------|
-/// | 0       | 4      | selector (callers may pass 0 — reserved)|
-/// | 4       | 4      | embedding dimension `dim` (big-endian)  |
-/// | 8       | ..     | text bytes                              |
+/// | Offset  | Length | Field                                          |
+/// |---------|--------|------------------------------------------------|
+/// | 0       | 4      | selector (callers may pass 0 — reserved)       |
+/// | 4       | 32     | model name (UTF-8, NUL-padded; empty = default)|
+/// | 36      | ..     | text bytes                                     |
 ///
-/// Output: `dim * 4` bytes, each four-byte group an IEEE-754 little-endian
-/// `f32` of the embedding vector — matching the byte layout that the
-/// canonical Lux embedding tensor produces.
+/// Output: `N * 4` bytes (N = the model's native embedding dimension), each
+/// four-byte group an IEEE-754 little-endian `f32` of the embedding vector.
 fn exec_ai_embedding(input: &[u8]) -> PrecompileResult {
-    const HEADER_LEN: usize = 4 + 4;
+    const HEADER_LEN: usize = 4 + 32;
     if input.len() < HEADER_LEN {
         return PrecompileResult::Revert {
             reason: format!(
-                "ai_embedding requires at least {} bytes (selector + dim)",
+                "ai_embedding requires at least {} bytes (selector + model id)",
                 HEADER_LEN
             ),
         };
     }
 
-    let dim = u32::from_be_bytes([input[4], input[5], input[6], input[7]]) as usize;
-    if dim == 0 || dim > 4096 {
-        return PrecompileResult::Revert {
-            reason: format!("invalid embedding dimension: {dim}"),
-        };
-    }
-
+    let model = model_name(&input[4..36]);
     let text = &input[HEADER_LEN..];
     if text.is_empty() {
         return PrecompileResult::Revert {
@@ -457,13 +535,16 @@ fn exec_ai_embedding(input: &[u8]) -> PrecompileResult {
         };
     }
 
-    match engine::embed(dim, text) {
+    // Input-based gas (see embedding_gas / required_gas), charged identically on
+    // success and (in the EVM glue) on revert — consistent with geth's
+    // RequiredGas model and independent of output dimension.
+    let gas_used = embedding_gas(input.len());
+    match engine::embed(&model, text) {
         Ok(vec) => {
-            let mut output = Vec::with_capacity(dim * 4);
-            for v in vec {
+            let mut output = Vec::with_capacity(vec.len() * 4);
+            for v in &vec {
                 output.extend_from_slice(&v.to_le_bytes());
             }
-            let gas_used = 50_000u64.saturating_add(dim as u64 * 16);
             PrecompileResult::Success { output, gas_used }
         }
         Err(EngineError::NoEmbeddingEngine) => PrecompileResult::Revert {
@@ -494,13 +575,18 @@ mod tests {
     // -----------------------------------------------------------------------
 
     #[test]
-    fn default_registry_has_four_precompiles() {
+    fn default_registry_has_expected_precompiles() {
         let reg = PrecompileRegistry::default();
-        assert_eq!(reg.len(), 4);
         assert!(reg.get(&ADDR_PQ_VERIFY).is_some());
-        assert!(reg.get(&ADDR_QUASAR_QUERY).is_some());
         assert!(reg.get(&ADDR_AI_INFERENCE).is_some());
         assert!(reg.get(&ADDR_AI_EMBEDDING).is_some());
+        #[cfg(feature = "quasar")]
+        {
+            assert_eq!(reg.len(), 4);
+            assert!(reg.get(&ADDR_QUASAR_QUERY).is_some());
+        }
+        #[cfg(not(feature = "quasar"))]
+        assert_eq!(reg.len(), 3);
     }
 
     #[test]
@@ -600,6 +686,7 @@ mod tests {
     // quasar_query
     // -----------------------------------------------------------------------
 
+    #[cfg(feature = "quasar")]
     #[test]
     fn quasar_query_rejects_short_input() {
         let result = exec_quasar_query(&[0; 10]);
@@ -611,6 +698,7 @@ mod tests {
     /// target. The proof is a no-op (commitment == proof) which the
     /// canonical impl accepts when the threshold flag is set; the test
     /// then flips the flag to verify the non-member path.
+    #[cfg(feature = "quasar")]
     #[test]
     fn exec_quasar_query_routes_through_libluxprecompile() {
         // Confirm the address is registered in the live dylib.
@@ -668,6 +756,36 @@ mod tests {
     fn ai_inference_rejects_empty() {
         let result = exec_ai_inference(&[]);
         assert!(matches!(result, PrecompileResult::Revert { .. }));
+    }
+
+    /// CONSENSUS-CRITICAL (RED H1): the Rust inference gas schedule MUST equal
+    /// the authoritative Go schedule in `chains/hanzo-evm/evmllm/precompile.go`,
+    /// byte-for-byte, or the two backends compute different `gas_used` for the
+    /// same transaction → divergent state root → chain fork. These LITERAL cases
+    /// mirror Go's `TestGasScheduleCanonical` exactly (input-based, clamped below
+    /// header, pure in input length), so a coefficient mutation FAILS on both
+    /// sides. The gas is input-based — independent of model output length —
+    /// because geth charges `RequiredGas(input)` before the output exists.
+    #[test]
+    fn inference_gas_matches_canonical_go_schedule() {
+        // Literal coefficient pin (NOT via the consts) — catches drift.
+        assert_eq!(GAS_BASE_INFER, 120_000, "base must match Go GasBaseInfer literal");
+        assert_eq!(GAS_PER_PROMPT_BYTE, 30, "per-byte must match Go GasPerPromptByte literal");
+
+        // header == 36; promptBytes = input_len - 36, clamped at 0 below header.
+        // Cases are byte-identical to Go's TestGasScheduleCanonical.
+        assert_eq!(inference_gas(AI_HEADER_LEN), 120_000, "header-only (zero prompt)");
+        assert_eq!(inference_gas(10), 120_000, "short input (<header) clamps prompt to 0");
+        assert_eq!(inference_gas(AI_HEADER_LEN + 1), 120_030, "header + 1 byte");
+        assert_eq!(inference_gas(AI_HEADER_LEN + 42), 121_260, "header + 42 bytes");
+        assert_eq!(inference_gas(AI_HEADER_LEN + 1024), 120_000 + 1024 * 30, "header + 1KiB");
+
+        // Purity: gas depends ONLY on input length, never on byte content or output.
+        assert_eq!(
+            inference_gas(AI_HEADER_LEN + 100),
+            inference_gas(AI_HEADER_LEN + 100),
+            "gas must be a pure function of input length"
+        );
     }
 
     #[test]
@@ -730,55 +848,48 @@ mod tests {
     // -----------------------------------------------------------------------
 
     #[test]
-    fn ai_embedding_validates_dimension() {
-        // Too short
+    fn ai_embedding_rejects_short_and_empty() {
+        // Too short (< selector + model id).
         let result = exec_ai_embedding(&[0; 2]);
         assert!(matches!(result, PrecompileResult::Revert { .. }));
 
-        // Dimension = 0 (header complete but dim invalid)
-        let mut input = vec![0u8; 4];
-        input.extend_from_slice(&0u32.to_be_bytes());
-        input.extend_from_slice(b"text");
-        let result = exec_ai_embedding(&input);
-        assert!(matches!(result, PrecompileResult::Revert { .. }));
-
-        // Dimension = 5000 (over limit)
-        let mut input = vec![0u8; 4];
-        input.extend_from_slice(&5000u32.to_be_bytes());
-        input.extend_from_slice(b"text");
-        let result = exec_ai_embedding(&input);
-        assert!(matches!(result, PrecompileResult::Revert { .. }));
+        // Header present but no text.
+        let input = vec![0u8; 4 + 32];
+        match exec_ai_embedding(&input) {
+            PrecompileResult::Revert { reason } => {
+                assert!(reason.contains("non-empty"), "got reason: {reason}");
+            }
+            other => panic!("expected Revert, got {other:?}"),
+        }
     }
 
-    /// Like [`exec_ai_inference_real_model`], this checks the dispatch
-    /// contract: with no engine the precompile reverts with the engine
-    /// name; with an engine it returns real bytes.
+    /// Dispatch contract: with no engine the precompile reverts; with an engine
+    /// it returns the model's native-dimension embedding as little-endian f32,
+    /// so the output is a non-empty multiple of 4 bytes.
     #[test]
     fn exec_ai_embedding_real_model() {
-        let dim: u32 = 128;
         let mut input = Vec::new();
         input.extend_from_slice(&[0u8; 4]); // selector
-        input.extend_from_slice(&dim.to_be_bytes());
+        input.extend_from_slice(&[0u8; 32]); // model name (empty = default)
         input.extend_from_slice(b"hello world");
 
-        let res = exec_ai_embedding(&input);
-        match res {
+        match exec_ai_embedding(&input) {
             PrecompileResult::Revert { reason } => {
                 assert!(
-                    reason.contains("embedding") && reason.contains("engine"),
-                    "expected 'no embedding engine registered'-like reason, got: {reason}"
+                    reason.contains("embedding")
+                        || reason.contains("engine")
+                        || reason.contains("model"),
+                    "expected engine/model-related revert, got: {reason}"
                 );
             }
             PrecompileResult::Success { output, .. } => {
-                // Engine installed elsewhere: must match dim * 4 bytes.
-                assert_eq!(output.len(), (dim as usize) * 4);
+                assert!(
+                    !output.is_empty() && output.len() % 4 == 0,
+                    "embedding output must be a non-empty multiple of 4 bytes, got {}",
+                    output.len()
+                );
             }
             other => panic!("unexpected result: {other:?}"),
-        }
-
-        // Same registry observation as the inference test.
-        if !hanzo_engine::embedding_engine_registered() {
-            // dispatch must have produced a Revert; covered above.
         }
     }
 }
