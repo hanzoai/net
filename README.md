@@ -12,25 +12,45 @@ runtime, post-quantum identity, and an embedded L2 that meters and settles compu
   <img src="https://img.shields.io/badge/crates-36-black" alt="36 crates">
 </p>
 
-## Status — read this before you clone
+## Install
 
-This workspace is a set of libraries under active development. Three things you need to
-know up front, because none of them are obvious from the crate list:
+The crates are on crates.io. Add the ones you need:
 
-- **It does not build from a public clone.** `hanzo-vm` takes path dependencies on
-  `../../engine/hanzo-engine` and `../../engine/hanzo-server-core`, expecting a sibling
-  checkout named `engine/`. The repository that provides those crates is not public, so
-  `cargo build` fails at workspace-manifest resolution — and because that failure happens
-  before member selection, `cargo build -p <crate>` fails the same way. Fixing this is
-  tracked work, not a configuration you can supply.
-- **Nothing here is published to crates.io.** The crate names below are the names in this
-  workspace; they are not package names you can `cargo add`. Depend on them by path.
-- **There is no node binary in this workspace.** These are libraries. The older
-  standalone node lives under `_archived-from-zoo/` and is not maintained.
+```bash
+cargo add hanzo-vm hanzo-runtime
+```
 
-If you want to run Hanzo models today, use the [Hanzo CLI](https://github.com/hanzoai/cli)
-(`curl -fsSL https://hanzo.sh | sh`) against the hosted API. This repository is where the
-self-hosted cluster is being built.
+Four crates ship under a `hanzonet-*` package name, because the plain name belongs to the
+Rust consumer SDK in [`hanzo-rs/sdk`](https://github.com/hanzo-rs/sdk). Rename them on the
+way in, and the rest of your code reads the same:
+
+```bash
+cargo add hanzonet-pqc --rename hanzo-pqc
+```
+
+```toml
+[dependencies]
+hanzo-vm      = "1.1"
+hanzo-runtime = "1.1"
+hanzo-pqc     = { version = "1.1", package = "hanzonet-pqc" }
+```
+
+The affected four are `hanzonet-pqc`, `hanzonet-did`, `hanzonet-config` and
+`hanzonet-mcp`. The Rust library name is always `hanzo_*`, so `use hanzo_pqc::…;` works
+either way.
+
+## Two things to know before you clone
+
+- **The workspace does not build from a public clone.** `hanzo-vm` takes path dependencies
+  on `../../engine/hanzo-engine` and `../../engine/hanzo-server-core`, expecting a sibling
+  checkout named `engine/` that is not public. Cargo fails during workspace-manifest
+  resolution, which happens before member selection, so `cargo build -p <crate>` fails the
+  same way. Consuming the published crates from crates.io is unaffected — that is the
+  supported path today.
+- **There is no node binary here.** These are libraries; the standalone node that used to
+  live in this tree is parked under `_archived-from-zoo/` and is not maintained. To run
+  Hanzo models right now, use the [Hanzo CLI](https://github.com/hanzoai/cli)
+  (`curl -fsSL https://hanzo.sh | sh`) against the hosted API.
 
 ## What is in here
 
@@ -44,29 +64,16 @@ self-hosted cluster is being built.
 | **Cluster economics** | `hanzo-compute`, `hanzo-machine`, `hanzo-mining`, `hanzo-hmm`, `hanzo-brain` | Compute accounting, VM lifecycle, and Hamiltonian market-maker pricing across heterogeneous hardware. |
 | **Settlement** | `hanzo-consensus`, `hanzo-vm`, `hanzo-l2` | Quasar BFT consensus, an EVM with post-quantum and inference precompiles, and an L2 bridge on Lux Network. |
 
-Plus `hanzo-ai-format`, `hanzo-config` and `hanzo-runtime-tests`. The full member list is
-in the root `Cargo.toml`.
-
-## Crate naming
-
-The directory name is `hanzo-*` for every crate. Four of them declare a `hanzonet-*`
-package name instead, because the plain name belongs to the consumer SDK in
-[`hanzo-rs/sdk`](https://github.com/hanzo-rs/sdk): `hanzo-pqc`, `hanzo-did`,
-`hanzo-config` and `hanzo-mcp` are packaged as `hanzonet-pqc`, `hanzonet-did`,
-`hanzonet-config` and `hanzonet-mcp`.
-
-The Rust library name is always `hanzo_*`, so `use hanzo_vm::…;` reads the same either way.
+Plus `hanzo-ai-format`, `hanzo-config` and `hanzo-runtime-tests`. The root `Cargo.toml`
+has the full member list; crates.io is the public distribution for all of them. (The
+per-crate mirror repositories under the `hanzonet` org are private, so links to them are
+not much use to a reader here.)
 
 ## Working in the tree
 
-```bash
-git clone https://github.com/hanzoai/net
-cd net
-cargo test -p <crate>        # once the workspace resolves; see Status above
-```
-
-Each crate owns its own tests. `LLM.md` has the layout notes and the conventions that
-apply inside this repo.
+Each crate owns its own tests; `cargo test -p <crate>` targets one, once the workspace
+resolves — see the note above. `LLM.md` carries the layout and the conventions that apply
+inside this repo.
 
 ## License
 
