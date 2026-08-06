@@ -1,0 +1,25 @@
+# Canonical CI/CD config for hanzoai/net — the one file both the hanzoai/ci
+# reusable (.hanzo/workflows/cicd.yml) and platform.hanzo.ai read.
+#
+# A 39-crate Cargo workspace (node runtime, libp2p, PQC, VM, jobs, MCP). It
+# builds no image from a push, so there is no `images:` and no `deploy:` —
+# only a gate. Before this file the repo had no CI of any kind on either forge.
+#
+# `cargo check --workspace` is the gate: every crate typechecks, every path
+# dependency resolves at the version the workspace pins, and a broken signature
+# anywhere in the graph is red. It stops before codegen, which is what keeps a
+# workspace this size inside the runner's memory ceiling — the sibling repo
+# hanzoai/ml proved the other side of that line, where `cargo test --workspace`
+# is killed mid-codegen and reports a memory limit rather than the code.
+#
+# The apt lines provision what the runner image does not ship and this graph
+# needs: cc + pkg-config + libssl-dev for the -sys crates, protoc for the
+# prost-based build scripts. Guarded, so they are a no-op once an image bakes
+# them in.
+test:
+  - name: build
+    run: |
+      set -e
+      command -v cc >/dev/null || { sudo apt-get update && sudo apt-get install -y build-essential pkg-config libssl-dev; }
+      command -v protoc >/dev/null || { sudo apt-get update && sudo apt-get install -y protobuf-compiler; }
+      cargo check --workspace
